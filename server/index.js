@@ -7,6 +7,7 @@ import {
   pickMockByText,
   finalizeAnalysis,
   safeParseJson,
+  applyLlmRephrase,
   extractEntities,
   COMPLAINT_REGISTRY,
 } from "../shared/offlineEngine.js";
@@ -226,8 +227,10 @@ app.post("/api/analyze", async (req, res) => {
         llmProvider: out.provider,
       });
     }
-    // Source tag for UI badge: groq | grok (LLM assist). Engines still own the blended verdict.
-    return respond(parsed, {
+    // Engines own risk/score/flags; LLM may only rephrase user-facing wording.
+    const engine = pickMockByText(text);
+    const rephrased = applyLlmRephrase(engine, parsed);
+    return respond(rephrased, {
       source: out.provider === "groq" ? "groq" : "grok",
       model: out.model,
       message: `Live ${out.provider} assist · engines keep the verdict`,
