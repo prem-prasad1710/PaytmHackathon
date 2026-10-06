@@ -16,7 +16,7 @@ import { getSettings, useStoreValue } from "./utils/store";
 
 export default function App() {
   const { theme } = useStoreValue(getSettings);
-  const wide = useLocation().pathname === "/lab";
+  const wide = ["/lab", "/demo"].includes(useLocation().pathname);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme === "dark" ? "dark" : "light";
@@ -32,6 +32,7 @@ export default function App() {
           <Route path="/threats" element={<ThreatMap />} />
           <Route path="/model" element={<ModelCard />} />
           <Route path="/lab" element={<FraudLab />} />
+          <Route path="/demo" element={<FraudLab />} />
           <Route path="/history" element={<History />} />
           <Route path="/complaint-sent" element={<ComplaintSent />} />
           <Route path="/confirm-pay" element={<ConfirmPay />} />

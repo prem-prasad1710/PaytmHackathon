@@ -1802,3 +1802,116 @@ code {
 .fraud-lab .stat-grid { grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); }
 .fraud-lab .stat strong { font-size: 1.45rem; }
 .fraud-lab .stat span { font-size: 0.8rem; }
+
+/* ---------- Judge demo ---------- */
+.judge-launch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--info-border);
+  background: linear-gradient(135deg, var(--info-bg), var(--card));
+}
+.judge-demo { display: grid; gap: 1rem; border-left: 5px solid var(--blue); }
+.judge-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+.judge-head-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.judge-stepper {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.4rem;
+}
+.judge-step-dot {
+  width: 100%; text-align: left; border: 1px solid var(--border); background: var(--surface-2);
+  border-radius: 12px; padding: 0.55rem 0.65rem; cursor: pointer; display: grid; gap: 0.15rem;
+}
+.judge-step-dot .num { font-weight: 800; color: var(--navy); font-size: 0.85rem; }
+.judge-step-dot .lab { font-size: 0.72rem; color: var(--muted); line-height: 1.2; }
+.judge-step-dot.active { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(0, 186, 242, 0.25); }
+.judge-step-dot.done { border-color: var(--safe); }
+.judge-stage { display: grid; gap: 0.85rem; }
+.judge-narration { background: var(--surface-2); border-radius: 14px; padding: 0.9rem 1rem; border: 1px solid var(--border); }
+.judge-body { display: grid; gap: 0.85rem; }
+.panel-inset { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 0.85rem 1rem; }
+.judge-message blockquote {
+  margin: 0.5rem 0 0; padding: 0.75rem 0.9rem; border-left: 3px solid var(--caution);
+  background: var(--warn-bg); border-radius: 0 10px 10px 0; font-size: 0.92rem; line-height: 1.45;
+}
+.judge-chips { margin-top: 0.65rem; }
+.signal-chip.tone-danger { background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-border); }
+.signal-chip.tone-warn { background: var(--warn-bg); color: var(--warn-text); border: 1px solid var(--warn-border); }
+.judge-guardian-card {
+  text-align: center; padding: 1.25rem; border-radius: 18px;
+  background: linear-gradient(160deg, #1a0508, #3a1417); color: #fecaca;
+  border: 1px solid #7f1d1d;
+}
+.judge-guardian-card .guardian-icon {
+  width: 48px; height: 48px; margin: 0 auto; border-radius: 50%;
+  display: grid; place-items: center; font-size: 1.6rem; font-weight: 800;
+  background: #dc2626; color: #fff;
+}
+.judge-controls {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
+  padding-top: 0.35rem; border-top: 1px solid var(--border);
+}
+
+/* ---------- Playbook timeline ---------- */
+.playbook-timeline { border-left: 5px solid var(--purple); }
+.playbook-here {
+  margin: 0 0 0.75rem; padding: 0.65rem 0.8rem; border-radius: 12px;
+  background: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; font-weight: 600; font-size: 0.92rem;
+}
+:root[data-theme="dark"] .playbook-here { background: #1e1b4b; color: #ddd6fe; border-color: #4c1d95; }
+.playbook-stages { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+.pb-stage {
+  display: grid; grid-template-columns: 28px 1fr; gap: 0.65rem; align-items: start;
+  padding: 0.55rem 0.65rem; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2);
+}
+.pb-index {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 0.75rem; font-weight: 800; background: var(--border); color: var(--muted);
+}
+.pb-stage.pb-done { opacity: 0.72; }
+.pb-stage.pb-done .pb-index { background: var(--safe); color: #fff; }
+.pb-stage.pb-current { border-color: var(--purple); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.18); }
+.pb-stage.pb-current .pb-index { background: var(--purple); color: #fff; }
+.pb-next { margin-top: 0.35rem; font-size: 0.85rem; color: var(--purple); font-weight: 600; }
+.playbook-timeline.compact .playbook-stages { grid-template-columns: 1fr; }
+
+/* ---------- Status badge ---------- */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+  padding: 0.28rem 0.65rem; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface-2); font-size: 0.78rem; line-height: 1.2;
+}
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.status-badge.tone-safe .status-dot { background: var(--safe); }
+.status-badge.tone-warn .status-dot { background: var(--caution); }
+.status-badge.tone-info .status-dot { background: var(--blue); }
+.status-badge.tone-muted .status-dot { background: var(--muted); }
+.status-label { font-weight: 700; }
+.status-hint { color: var(--muted); }
+
+/* ---------- Dual explain ---------- */
+.dual-explain {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+}
+@media (max-width: 720px) { .dual-explain { grid-template-columns: 1fr; } }
+.dual-user, .dual-analyst {
+  border: 1px solid var(--border); border-radius: 14px; padding: 0.85rem 1rem; background: var(--surface-2);
+}
+.dual-user { border-left: 4px solid var(--blue); }
+.dual-analyst { border-left: 4px solid var(--navy); }
+.dual-analyst .analyst-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.dual-analyst .analyst-table td { padding: 0.25rem 0.35rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+.dual-analyst .analyst-table td:first-child { color: var(--muted); width: 38%; }
+.dual-compact { margin-bottom: 0.5rem; }
+.time-lock-banner {
+  text-align: left; margin: 0 0 1rem; padding: 0.85rem 1rem; border-radius: 14px;
+  background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn-text);
+}
+.time-lock-banner strong { display: block; margin-bottom: 0.25rem; }
+.time-lock-count { font-size: 1.6rem; font-weight: 800; letter-spacing: 0.02em; }
+.coercion-banner {
+  margin: 0.75rem 0; padding: 0.85rem 1rem; border-radius: 14px;
+  background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger-text);
+}

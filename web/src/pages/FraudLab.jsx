@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import LabHero from "../components/fraud/LabHero.jsx";
 import CaseCards from "../components/fraud/CaseCards.jsx";
 import MlIntelligence from "../components/fraud/MlIntelligence.jsx";
@@ -6,6 +7,7 @@ import DecisionCard from "../components/fraud/DecisionCard.jsx";
 import LiveStream, { ThreatAlert } from "../components/fraud/LiveStream.jsx";
 import NetworkGraph from "../components/fraud/NetworkGraph.jsx";
 import ScamDna from "../components/fraud/ScamDna.jsx";
+import JudgeDemo from "../components/fraud/JudgeDemo.jsx";
 import { fetchNetwork, fetchOverview, nextStream, resetLab, runScenario } from "../services/fraudApi";
 
 const STREAM_INTERVAL_MS = 1400;
@@ -25,6 +27,24 @@ export default function FraudLab() {
   const [running, setRunning] = useState(false);
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [showJudge, setShowJudge] = useState(
+    () => searchParams.get("demo") === "1" || location.pathname === "/demo"
+  );
+
+  useEffect(() => {
+    if (searchParams.get("demo") === "1" || location.pathname === "/demo") setShowJudge(true);
+  }, [searchParams, location.pathname]);
+
+  const openJudge = () => {
+    setShowJudge(true);
+    setSearchParams({ demo: "1" }, { replace: true });
+  };
+  const closeJudge = () => {
+    setShowJudge(false);
+    setSearchParams({}, { replace: true });
+  };
   const sinceRefresh = useRef(0);
   const decisionRef = useRef(null);
 
@@ -126,6 +146,19 @@ export default function FraudLab() {
     <div className="fraud-lab">
       <div className="stack">
         <LabHero overview={overview} onReset={reset} />
+        <div className="judge-launch panel" data-testid="judge-launch">
+          <div>
+            <span className="eyebrow">For judges</span>
+            <h3 style={{ margin: "0.2rem 0" }}>One-click live demo</h3>
+            <p className="muted" style={{ margin: 0 }}>
+              Scripted digital-arrest → fake KYC story. Works fully offline — pause, next, reset.
+            </p>
+          </div>
+          <button type="button" className="btn btn-primary" onClick={openJudge} data-testid="start-judge-demo">
+            ▶ Start judge demo
+          </button>
+        </div>
+        {showJudge && <JudgeDemo embedded onClose={closeJudge} />}
         <CaseCards scenarios={overview?.scenarios} busy={busy} activeCase={activeCase} onRun={runCase} />
         {error && <div className="error-banner" role="alert">{error}</div>}
         <ThreatAlert

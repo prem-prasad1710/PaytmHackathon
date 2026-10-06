@@ -67,6 +67,7 @@ export default function Home() {
             <Link className="btn btn-secondary" to="/analyze" state={{ tab: "message" }}>✉ Check a message</Link>
             <Link className="btn btn-secondary" to="/analyze" state={{ tab: "screenshot" }}>🖼 Screenshot</Link>
             <Link className="btn btn-secondary" to="/lab">⚡ Fraud Lab</Link>
+            <Link className="btn btn-primary" to="/demo">▶ Judge demo</Link>
           </div>
         </div>
         <ScoreRing score={stats.score} empty={stats.checks === 0 && stats.reports === 0 && payments.length === 0} />
@@ -130,6 +131,7 @@ export default function Home() {
         <div className="feature"><strong>▣ QR Guard</strong>Reads UPI payloads, spots collect-requests and "receive money" traps.</div>
         <div className="feature"><strong>🧠 ML + Rules</strong>Explainable scoring with highlighted risky words.</div>
         <Link to="/lab" className="feature feature-link"><strong>⚡ Fraud Lab</strong>XGBoost + network graph + rules score every payment, live.</Link>
+        <Link to="/demo" className="feature feature-link"><strong>▶ Judge demo</strong>One-click scripted scam story for the panel — works offline.</Link>
         <div className="feature"><strong>🛡 Payment Guardian</strong>Cooling-off timer when amount, payee or timing looks unusual.</div>
         <div className="feature"><strong>🗺 Community map</strong>Live reports by state feed back into detection.</div>
       </section>
