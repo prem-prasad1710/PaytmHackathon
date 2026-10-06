@@ -4,7 +4,10 @@ import { fetchTransactionRisk } from "../services/guardianApi";
 import { buildTxnContext } from "../utils/txnContext";
 import { addPayment, parseAmount } from "../utils/store";
 
+/** Seconds of cooling-off. First-time + high-risk / large first payment get a longer lock. */
 const COOLDOWN = { high: 15, elevated: 8, normal: 0 };
+const FIRST_PAYEE_LOCK = { high: 45, elevated: 25, normal: 0 };
+const LARGE_FIRST_THRESHOLD = 5000; // ₹ — demos LARGE_FIRST_PAYMENT spirit
 
 function combineLevel(textRisk, anomalyLevel) {
   if (textRisk === "High Risk" || anomalyLevel === "high") return "high";
@@ -41,7 +44,28 @@ export default function ConfirmPay() {
   }, [ctx]);
 
   const level = txn ? combineLevel(textRisk, txn.level) : null;
-  const cooldown = level ? COOLDOWN[level] : null;
+  const amountNum = parseAmount(amount);
+  const largeFirst = Boolean(ctx.new_payee && amountNum >= LARGE_FIRST_THRESHOLD);
+  const firstPayeeRisk = Boolean(ctx.new_payee && level && level !== "normal");
+  const timeLock = Boolean(firstPayeeRisk || largeFirst || (level === "high" && ctx.new_payee));
+
+  const cooldown = level
+    ? timeLock
+      ? FIRST_PAYEE_LOCK[level] || COOLDOWN[level]
+      : COOLDOWN[level]
+    : null;
+
+  const lockReasons = useMemo(() => {
+    const reasons = [];
+    if (ctx.new_payee) reasons.push("First-time payee — you have not paid this handle before");
+    if (largeFirst) reasons.push(`Large first payment (₹${amountNum.toLocaleString("en-IN")}) to a new payee`);
+    if (level === "high") reasons.push("High-risk signals on the message or behaviour check");
+    else if (level === "elevated") reasons.push("Elevated caution — take a breath before confirming");
+    if (txn?.reasons?.length) {
+      for (const r of txn.reasons.slice(0, 2)) reasons.push(r.text);
+    }
+    return [...new Set(reasons)];
+  }, [ctx.new_payee, largeFirst, level, amountNum, txn]);
 
   useEffect(() => {
     if (cooldown === null) return undefined;
@@ -51,13 +75,13 @@ export default function ConfirmPay() {
     return () => clearInterval(id);
   }, [cooldown]);
 
-  const needsAck = level === "high" || level === "elevated";
+  const needsAck = level === "high" || level === "elevated" || timeLock;
   const ready = level !== null && remaining === 0 && (!needsAck || ackVerified);
 
   function handlePay() {
     setProcessing(true);
     addPayment({
-      amount: parseAmount(amount),
+      amount: amountNum,
       payee: entity || payee,
       risk: level === "high" ? "High Risk" : textRisk,
     });
@@ -70,7 +94,7 @@ export default function ConfirmPay() {
     level === null
       ? "Checking payment..."
       : remaining > 0
-        ? `Wait ${remaining}s`
+        ? `Cooling off · ${remaining}s`
         : processing
           ? "Paying..."
           : "Confirm & Pay";
@@ -89,10 +113,34 @@ export default function ConfirmPay() {
         <strong>Amount</strong>
         <div>{amount}</div>
         <strong style={{ marginTop: "0.75rem" }}>Pay to</strong>
-        <div>{payee}{entity && entity !== payee ? ` (${entity})` : ""}</div>
+        <div>
+          {payee}
+          {entity && entity !== payee ? ` (${entity})` : ""}
+          {ctx.new_payee ? <span className="pill pill-purple" style={{ marginLeft: 8 }}>New payee</span> : null}
+        </div>
         <strong style={{ marginTop: "0.75rem" }}>Shield note</strong>
         <div>{summary}</div>
       </div>
+
+      {timeLock && remaining !== null && (
+        <div className="time-lock-banner" role="status" data-testid="time-lock">
+          <strong>Time-lock active{remaining > 0 ? "" : " complete"}</strong>
+          {remaining > 0 ? (
+            <div className="time-lock-count">{remaining}s</div>
+          ) : (
+            <div className="muted small">You can proceed — only if you still trust this payee.</div>
+          )}
+          <ul className="gp-reasons" style={{ marginTop: "0.5rem" }}>
+            {lockReasons.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
+          <p className="muted small" style={{ margin: "0.5rem 0 0" }}>
+            Inspired by LARGE_FIRST_PAYMENT / first-time payee controls. After the countdown you may confirm
+            deliberately — Shield never auto-pays.
+          </p>
+        </div>
+      )}
 
       <div className={`guardian-panel level-${level || "loading"}`} role="status">
         <div className="gp-head">
@@ -100,7 +148,9 @@ export default function ConfirmPay() {
           {txn && <span className="muted small">{txn.model}</span>}
         </div>
         {!txn ? (
-          <div className="loading"><span className="spinner" aria-hidden="true" /> Analysing amount, payee and timing...</div>
+          <div className="loading">
+            <span className="spinner" aria-hidden="true" /> Analysing amount, payee and timing...
+          </div>
         ) : (
           <>
             <div className="gp-meter" title={`Anomaly score ${txn.anomaly_score}`}>
@@ -114,7 +164,9 @@ export default function ConfirmPay() {
             </div>
             {txn.reasons?.length > 0 ? (
               <ul className="gp-reasons">
-                {txn.reasons.map((r) => <li key={r.feature}>{r.text}</li>)}
+                {txn.reasons.map((r) => (
+                  <li key={r.feature}>{r.text}</li>
+                ))}
               </ul>
             ) : (
               <p className="muted small" style={{ margin: 0 }}>
@@ -143,7 +195,12 @@ export default function ConfirmPay() {
       )}
 
       <div className="row-actions" style={{ justifyContent: "center" }}>
-        <button className={`btn ${level === "high" ? "btn-danger" : "btn-safe"}`} onClick={handlePay} disabled={!ready || processing}>
+        <button
+          className={`btn ${level === "high" ? "btn-danger" : "btn-safe"}`}
+          onClick={handlePay}
+          disabled={!ready || processing}
+          data-testid="confirm-pay-btn"
+        >
           {label}
         </button>
         <Link className="btn btn-secondary" to="/analyze">
