@@ -37,7 +37,15 @@ export async function analyzeText(text, { useMock = false } = {}) {
     const data = await res.json();
     // Hybrid server responses are already normalised, blended with ML and enriched.
     if (data.score_breakdown) {
-      return { ...data, source: data.source || "mock" };
+      const mode =
+        data.ml_available || data.ml
+          ? "hybrid"
+          : data.source === "grok"
+            ? "grok"
+            : data.source === "mock"
+              ? "mock"
+              : "api";
+      return { ...data, source: mode };
     }
     // Older servers: ensure complaint alert exists client-side too.
     return finalizeAnalysis(data, trimmed, {

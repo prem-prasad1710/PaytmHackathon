@@ -25,9 +25,24 @@ export default function GuardianOverlay({ result, onBlock, onReport, onClose }) 
     <div className="guardian" role="alertdialog" aria-modal="true" aria-labelledby="guardian-title">
       <div className="guardian-card">
         <div className="guardian-icon" aria-hidden="true">!</div>
-        <h2 id="guardian-title">Stop. This looks like a scam.</h2>
+        <h2 id="guardian-title">
+          {result.coercion?.coachingSuspected
+            ? "Stop. Someone may be coaching you."
+            : "Stop. This looks like a scam."}
+        </h2>
         <p className="guardian-score">Risk score {result.score}/100</p>
-        <p className="guardian-summary">{result.hindi_summary}</p>
+        <p className="guardian-summary">
+          {result.coercion?.coachingSuspected
+            ? (result.coercion.interventionHi || result.coercion.interventionEn)
+            : result.hindi_summary}
+        </p>
+        {result.coercion?.flags?.length > 0 && (
+          <div className="chip-row" style={{ justifyContent: "center", marginBottom: "0.75rem" }}>
+            {result.coercion.flags.map((f) => (
+              <span key={f.id} className="chip signal-chip tone-danger">{f.label}</span>
+            ))}
+          </div>
+        )}
 
         {slides.length > 0 && (
           <div className="guardian-slide" key={i} aria-live="polite">
