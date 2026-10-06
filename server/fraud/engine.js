@@ -53,8 +53,24 @@ export class FraudEngine {
     this.history = [];
     this.sequence = 0;
     this.clock = WORLD_NOW;
+    this._decisionListeners = new Set();
     this.ml.attachLedger?.(this.ledger);
     this.#loadWorld();
+  }
+
+  onDecision(listener) {
+    this._decisionListeners.add(listener);
+    return () => this._decisionListeners.delete(listener);
+  }
+
+  #notifyDecision(decision, meta = {}) {
+    for (const fn of this._decisionListeners) {
+      try {
+        fn(decision, meta);
+      } catch (err) {
+        console.error("decision listener error:", err);
+      }
+    }
   }
 
   /** Pre-load the ML feature store so the first payment does not pay for the sync. */
@@ -87,7 +103,7 @@ export class FraudEngine {
   }
 
   /** Score one payment with ML + graph + rules. Does not change the ledger. */
-  async evaluate(input) {
+  async evaluate(input, meta = {}) {
     const t0 = performance.now();
     const tx = normalize(input, this.clock);
     const facts = this.ledger.facts(tx);
@@ -160,6 +176,7 @@ export class FraudEngine {
     if (text.dual) result.dual = text.dual;
     result.latencyMs = Number((performance.now() - t0).toFixed(2));
     this.monitoring.record(result);
+    this.#notifyDecision(result, meta);
     return result;
   }
 
@@ -184,7 +201,7 @@ export class FraudEngine {
     const sc = Object.hasOwn(this.world.scenarios, name) ? this.world.scenarios[name] : null;
     if (!sc) throw new ValidationError(`unknown scenario: ${name}`);
     if (this.clock !== WORLD_NOW) await this.#rewind();
-    const decision = await this.evaluate(sc.transaction);
+    const decision = await this.evaluate(sc.transaction, { scenario: name });
     this.#remember(decision, { scenario: name });
     return { scenario: name, label: sc.label, story: sc.story, decision };
   }
@@ -192,7 +209,7 @@ export class FraudEngine {
   /** One step of the live stream: generate a payment, score it, settle it unless blocked. */
   async streamNext() {
     const { transaction } = this.simulator.next();
-    const decision = await this.evaluate({ ...transaction, timestamp: this.clock });
+    const decision = await this.evaluate({ ...transaction, timestamp: this.clock }, { live: true });
     if (decision.decision !== "BLOCK") await this.settle({ ...transaction, timestamp: this.clock });
     this.clock += STREAM_STEP_S;
     this.#remember(decision, { live: true });

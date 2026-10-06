@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   SAMPLE_TRANSACTIONS,
   COMPLAINT_RECIPIENTS,
@@ -24,9 +24,14 @@ function MyChecks() {
           <h2 style={{ margin: 0 }}>My checks</h2>
           <p className="muted" style={{ margin: "0.3rem 0 0" }}>Saved only on this device.</p>
         </div>
-        {checks.length > 0 && (
-          <button type="button" className="btn btn-secondary" onClick={clearChecks}>Clear all</button>
-        )}
+        <div className="row-actions" style={{ margin: 0 }}>
+          <Link className="btn btn-primary" to="/report-pack" state={{ source: "check" }}>
+            Report pack
+          </Link>
+          {checks.length > 0 && (
+            <button type="button" className="btn btn-secondary" onClick={clearChecks}>Clear all</button>
+          )}
+        </div>
       </div>
 
       <div className="sample-row" role="group" aria-label="Filter by risk">

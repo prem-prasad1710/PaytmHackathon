@@ -1,0 +1,265 @@
+.ls-page {
+  padding-bottom: 5rem;
+}
+
+.ls-hero {
+  display: grid;
+  gap: 1rem;
+}
+
+.ls-hero h2 {
+  margin: 0;
+}
+
+.ls-input-wrap {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ls-textarea {
+  width: 100%;
+  min-height: 7rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  resize: vertical;
+}
+
+.ls-textarea:focus {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.ls-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ls-samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.ls-samples .chip {
+  max-width: 100%;
+  text-align: left;
+  white-space: normal;
+}
+
+.ls-empty {
+  padding: 1.25rem;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.ls-results {
+  display: grid;
+  gap: 1rem;
+}
+
+.ls-result {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+  background: var(--surface-2);
+}
+
+.ls-result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.ls-verdict-banner {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.ls-verdict-safe {
+  background: color-mix(in srgb, var(--safe) 14%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--safe) 35%, var(--border));
+  color: var(--safe);
+}
+
+.ls-verdict-caution {
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  color: var(--warn-text);
+}
+
+.ls-verdict-danger {
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
+}
+
+.ls-risk-ring {
+  --ring-deg: 0deg;
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  background: conic-gradient(var(--danger) var(--ring-deg), var(--border) 0);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ls-risk-ring::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: var(--card);
+}
+
+.ls-risk-ring span {
+  position: relative;
+  z-index: 1;
+  font-size: 0.95rem;
+}
+
+.ls-verdict-safe .ls-risk-ring {
+  background: conic-gradient(var(--safe) var(--ring-deg), var(--border) 0);
+}
+
+.ls-verdict-caution .ls-risk-ring {
+  background: conic-gradient(var(--caution) var(--ring-deg), var(--border) 0);
+}
+
+.ls-input-block {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+.ls-input-code {
+  display: block;
+  word-break: break-all;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  font-size: 0.82rem;
+}
+
+.ls-anatomy {
+  margin-bottom: 0.85rem;
+}
+
+.ls-anatomy-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ls-anatomy-seg {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  min-width: 4.5rem;
+}
+
+.ls-anatomy-seg em {
+  font-style: normal;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.ls-anatomy-seg strong {
+  font-size: 0.82rem;
+  word-break: break-all;
+}
+
+.ls-anatomy-focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--danger) 30%, transparent);
+}
+
+.ls-anatomy-note {
+  margin: 0.5rem 0 0;
+}
+
+.ls-signals h4,
+.ls-advice h4,
+.ls-official h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.ls-signals ul,
+.ls-advice ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.ls-signal-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ls-weight {
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.ls-official {
+  margin-top: 0.85rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+}
+
+.ls-official-domain {
+  font-weight: 700;
+}
+
+.ls-advice {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+.ls-limits {
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .ls-result-head {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .ls-risk-ring {
+    margin-left: auto;
+  }
+
+  .ls-verdict-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

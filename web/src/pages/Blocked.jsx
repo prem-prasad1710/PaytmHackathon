@@ -62,6 +62,13 @@ export default function Blocked() {
         <Link className="btn btn-danger" to="/blocked" state={{ ...location.state, reported: true }}>
           Report this scam
         </Link>
+        <Link
+          className="btn btn-secondary"
+          to="/report-pack"
+          state={{ source: "blocked", summary, payee: entity, amount: location.state?.amount, risk: location.state?.risk }}
+        >
+          Report pack →
+        </Link>
         <Link className="btn btn-primary" to="/analyze">
           Check another
         </Link>
