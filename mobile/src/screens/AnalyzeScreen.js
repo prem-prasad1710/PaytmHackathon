@@ -43,6 +43,7 @@ export default function AnalyzeScreen({ navigation }) {
       amount: meta.amount,
       payee: meta.payee,
       summary: meta.summary,
+      risk: result?.risk,
       ...extra,
     };
   }
@@ -183,6 +184,39 @@ export default function AnalyzeScreen({ navigation }) {
             </Text>
           ))}
 
+          {result.coercion?.coachingSuspected ? (
+            <View style={styles.coachBox}>
+              <Text style={styles.coachTitle}>Someone may be coaching you</Text>
+              <Text style={styles.coachText}>
+                {result.coercion.interventionHi || result.coercion.interventionEn}
+              </Text>
+            </View>
+          ) : null}
+
+          {result.playbook ? (
+            <View style={styles.playbookBox}>
+              <Text style={styles.playbookTitle}>
+                Playbook: {result.playbook.name} · stage {result.playbook.stageIndex + 1}/
+                {result.playbook.stageCount}
+              </Text>
+              <Text style={styles.muted}>{result.playbook.youAreHereHi || result.playbook.youAreHere}</Text>
+            </View>
+          ) : null}
+
+          {result.dual?.user ? (
+            <View style={styles.dualBox}>
+              <Text style={styles.playbookTitle}>For you (Hinglish)</Text>
+              <Text style={styles.body}>{result.dual.user.headline}</Text>
+              {result.dual.analyst ? (
+                <Text style={[styles.muted, { marginTop: 6 }]}>
+                  Analyst: {result.dual.analyst.verdict}
+                  {result.dual.analyst.score != null ? ` · ${result.dual.analyst.score}/100` : ""}
+                  {result.dual.analyst.playbookId ? ` · ${result.dual.analyst.playbookId}` : ""}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
+
           <Pressable
             style={[styles.actionBtn, { backgroundColor: riskColor(result.risk) }]}
             onPress={onPrimary}
@@ -281,6 +315,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: "#fff",
+  },
+  coachBox: {
+    backgroundColor: "#fef2f2",
+    borderColor: "#fecaca",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 8,
+  },
+  coachTitle: { color: "#991b1b", fontWeight: "800", marginBottom: 4 },
+  coachText: { color: "#991b1b", lineHeight: 20 },
+  playbookBox: {
+    backgroundColor: "#f5f3ff",
+    borderColor: "#ddd6fe",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 8,
+  },
+  playbookTitle: { color: "#5b21b6", fontWeight: "800", marginBottom: 4 },
+  dualBox: {
+    backgroundColor: "#f0f9ff",
+    borderColor: "#bae6fd",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 8,
   },
   secondaryBtnText: { color: colors.navy, fontWeight: "700" },
   complaintBox: {
