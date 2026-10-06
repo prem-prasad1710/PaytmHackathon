@@ -32,7 +32,7 @@ export function resolveLlmConfig(env = process.env) {
     return {
       provider: "groq",
       apiKey: groqKey,
-      model: String(env.GROQ_MODEL || "llama-3.3-70b-versatile").trim() || "llama-3.3-70b-versatile",
+      model: String(env.GROQ_MODEL || "openai/gpt-oss-20b").trim() || "openai/gpt-oss-20b",
       url: String(env.GROQ_API_URL || "https://api.groq.com/openai/v1/chat/completions").trim(),
       timeoutMs: Number(env.LLM_TIMEOUT_MS || 12000),
     };

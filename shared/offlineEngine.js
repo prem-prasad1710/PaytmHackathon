@@ -17,6 +17,7 @@ Your job:
 - Be practical, calm, and clear. Reply summaries in Hinglish (mix) so Hindi + English users understand.
 - NEVER encourage sending money to risky parties.
 - This is advisory only.
+- When engines already scored the text, only rephrase reasons/hindi_summary/recommended_action; do not invent a conflicting risk level.
 
 Output STRICTLY valid JSON only (no markdown):
 {
@@ -1142,6 +1143,24 @@ export function finalizeAnalysis(result, text, meta = {}) {
 
   base.dual = buildMessageDualExplain(base);
   return base;
+}
+
+
+/** Keep engine-owned risk/score/flags; LLM may only supply user-facing wording. */
+export function applyLlmRephrase(engineBase, llmRaw = {}) {
+  const base = normalizeResult(engineBase);
+  const reasons =
+    Array.isArray(llmRaw.reasons) && llmRaw.reasons.length
+      ? llmRaw.reasons.slice(0, 5).map(String)
+      : base.reasons;
+  return {
+    ...base,
+    reasons,
+    recommended_action: String(
+      llmRaw.recommended_action || base.recommended_action
+    ).slice(0, 400),
+    hindi_summary: String(llmRaw.hindi_summary || base.hindi_summary).slice(0, 600),
+  };
 }
 
 export function safeParseJson(content) {

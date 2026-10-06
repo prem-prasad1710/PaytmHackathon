@@ -162,6 +162,24 @@ export function normalizeResult(raw = {}) {
   };
 }
 
+
+/** Keep engine-owned risk/score/flags; LLM may only supply user-facing wording. */
+export function applyLlmRephrase(engineBase, llmRaw = {}) {
+  const base = normalizeResult(engineBase);
+  const reasons =
+    Array.isArray(llmRaw.reasons) && llmRaw.reasons.length
+      ? llmRaw.reasons.slice(0, 5).map(String)
+      : base.reasons;
+  return {
+    ...base,
+    reasons,
+    recommended_action: String(
+      llmRaw.recommended_action || base.recommended_action
+    ).slice(0, 400),
+    hindi_summary: String(llmRaw.hindi_summary || base.hindi_summary).slice(0, 600),
+  };
+}
+
 export function safeParseJson(content) {
   try {
     const cleaned = String(content || "")

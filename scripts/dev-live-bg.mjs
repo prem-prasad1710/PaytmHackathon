@@ -33,14 +33,14 @@ function bg(name, cmd, args, cwd, envExtra = {}) {
 
 bg(
   "ml",
-  "bash",
-  ["-lc", 'exec python3 -m uvicorn inference.model_service:app --host 0.0.0.0 --port 8001'],
-  path.join(root, "ml"),
+  process.execPath,
+  [path.join(root, "scripts", "ml.mjs"), "serve"],
+  root,
 );
 bg(
   "api",
   "npm",
-  ["run", "dev"],
+  ["run", "start"],
   path.join(root, "server"),
   { HOST: "0.0.0.0", PORT: "8787", ML_SERVICE_URL: "http://127.0.0.1:8001" },
 );
