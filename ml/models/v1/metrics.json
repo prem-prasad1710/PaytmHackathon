@@ -1,0 +1,244 @@
+{
+  "modelVersion": "v1.0",
+  "algorithm": "XGBoost",
+  "evaluatedAt": "2026-10-06T12:19:17+00:00",
+  "evaluationSet": "chronologically last 15% of transactions (never used for training or tuning)",
+  "split": {
+    "train": {
+      "rows": 84947,
+      "fraudRows": 3877,
+      "fraudRate": 0.0456,
+      "from": 1767205807.0,
+      "to": 1770884390.0
+    },
+    "validation": {
+      "rows": 18203,
+      "fraudRows": 974,
+      "fraudRate": 0.0535,
+      "from": 1770884416.0,
+      "to": 1771655373.0
+    },
+    "test": {
+      "rows": 18203,
+      "fraudRows": 609,
+      "fraudRate": 0.0335,
+      "from": 1771655401.0,
+      "to": 1772389753.0
+    },
+    "strategy": "chronological 70/15/15 split by transaction timestamp (no shuffling)"
+  },
+  "test": {
+    "threshold": 0.5241,
+    "precision": 0.9931,
+    "recall": 0.9507,
+    "f1": 0.9715,
+    "rocAuc": 0.9998,
+    "prAuc": 0.9965,
+    "falsePositiveRate": 0.00023,
+    "falseNegativeRate": 0.0493,
+    "confusionMatrix": {
+      "tn": 17590,
+      "fp": 4,
+      "fn": 30,
+      "tp": 579
+    },
+    "logLoss": 0.0049,
+    "brierScore": 0.0013,
+    "precisionIfFraudRate1pct": 0.9769,
+    "samples": 18203,
+    "fraudSamples": 609
+  },
+  "validation": {
+    "threshold": 0.5241,
+    "precision": 0.9662,
+    "recall": 0.9384,
+    "f1": 0.9521,
+    "rocAuc": 0.9988,
+    "prAuc": 0.9867,
+    "falsePositiveRate": 0.00186,
+    "falseNegativeRate": 0.0616,
+    "confusionMatrix": {
+      "tn": 17197,
+      "fp": 32,
+      "fn": 60,
+      "tp": 914
+    },
+    "logLoss": 0.0162,
+    "brierScore": 0.0041,
+    "precisionIfFraudRate1pct": 0.8362,
+    "samples": 18203,
+    "fraudSamples": 974
+  },
+  "comparison": {
+    "logisticRegression": {
+      "algorithm": "Logistic Regression",
+      "threshold": 0.9703,
+      "precision": 0.9051,
+      "recall": 0.7833,
+      "f1": 0.8398,
+      "rocAuc": 0.9949,
+      "prAuc": 0.9167,
+      "falsePositiveRate": 0.00284,
+      "falseNegativeRate": 0.2167,
+      "confusionMatrix": {
+        "tn": 17544,
+        "fp": 50,
+        "fn": 132,
+        "tp": 477
+      },
+      "logLoss": 0.0933,
+      "brierScore": 0.0282,
+      "precisionIfFraudRate1pct": 0.7357,
+      "samples": 18203,
+      "fraudSamples": 609
+    },
+    "primary": {
+      "algorithm": "XGBoost",
+      "threshold": 0.5241,
+      "precision": 0.9931,
+      "recall": 0.9507,
+      "f1": 0.9715,
+      "rocAuc": 0.9998,
+      "prAuc": 0.9965,
+      "falsePositiveRate": 0.00023,
+      "falseNegativeRate": 0.0493,
+      "confusionMatrix": {
+        "tn": 17590,
+        "fp": 4,
+        "fn": 30,
+        "tp": 579
+      },
+      "logLoss": 0.0049,
+      "brierScore": 0.0013,
+      "precisionIfFraudRate1pct": 0.9769,
+      "samples": 18203,
+      "fraudSamples": 609
+    }
+  },
+  "perScamTypeRecall": {
+    "account_takeover": {
+      "samples": 65,
+      "recall": 1.0
+    },
+    "investment_scam": {
+      "samples": 29,
+      "recall": 0.931
+    },
+    "job_scam": {
+      "samples": 172,
+      "recall": 0.8663
+    },
+    "money_mule": {
+      "samples": 242,
+      "recall": 0.9959
+    },
+    "phishing_kyc": {
+      "samples": 68,
+      "recall": 0.9853
+    },
+    "reward_scam": {
+      "samples": 33,
+      "recall": 0.9091
+    }
+  },
+  "hardSegments": {
+    "coldStart": {
+      "samples": 1921,
+      "fraudSamples": 111,
+      "precision": 0.9901,
+      "recall": 0.9009,
+      "f1": 0.9434,
+      "prAuc": 0.9814
+    },
+    "recipientOlderThan30Days": {
+      "samples": 16497,
+      "fraudSamples": 268,
+      "precision": 0.988,
+      "recall": 0.9216,
+      "f1": 0.9537,
+      "prAuc": 0.9941
+    },
+    "unrecognisedDevice": {
+      "samples": 210,
+      "fraudSamples": 69,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "prAuc": 1.0
+    }
+  },
+  "reliability": [
+    {
+      "bin": "0.0-0.1",
+      "count": 17569,
+      "meanPredicted": 0.0005,
+      "observedFraudRate": 0.0005
+    },
+    {
+      "bin": "0.1-0.2",
+      "count": 21,
+      "meanPredicted": 0.1357,
+      "observedFraudRate": 0.1905
+    },
+    {
+      "bin": "0.2-0.3",
+      "count": 10,
+      "meanPredicted": 0.2356,
+      "observedFraudRate": 0.5
+    },
+    {
+      "bin": "0.3-0.4",
+      "count": 9,
+      "meanPredicted": 0.3456,
+      "observedFraudRate": 0.4444
+    },
+    {
+      "bin": "0.4-0.5",
+      "count": 5,
+      "meanPredicted": 0.4518,
+      "observedFraudRate": 0.6
+    },
+    {
+      "bin": "0.5-0.6",
+      "count": 15,
+      "meanPredicted": 0.5365,
+      "observedFraudRate": 0.7333
+    },
+    {
+      "bin": "0.6-0.7",
+      "count": 11,
+      "meanPredicted": 0.6623,
+      "observedFraudRate": 1.0
+    },
+    {
+      "bin": "0.7-0.8",
+      "count": 5,
+      "meanPredicted": 0.733,
+      "observedFraudRate": 1.0
+    },
+    {
+      "bin": "0.8-0.9",
+      "count": 12,
+      "meanPredicted": 0.8599,
+      "observedFraudRate": 1.0
+    },
+    {
+      "bin": "0.9-1.0",
+      "count": 546,
+      "meanPredicted": 0.996,
+      "observedFraudRate": 1.0
+    }
+  ],
+  "latency": {
+    "meanMs": 0.64,
+    "p95Ms": 0.78,
+    "samples": 300,
+    "includesExplanation": true
+  },
+  "dataLeakageControls": [
+    "features computed from event state strictly before each payment",
+    "chronological split: test set is the newest 15% of payments",
+    "decision threshold chosen on validation, not test",
+    "labels never used as inputs"
+  ]
+}

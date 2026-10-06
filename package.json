@@ -1,0 +1,25 @@
+{
+  "name": "paytm-scam-shield-workspace",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Paytm Scam Shield: web + API + ML service",
+  "scripts": {
+    "setup": "npm --prefix web install && npm --prefix server install && npm run setup:ml",
+    "setup:js": "npm --prefix web install && npm --prefix server install",
+    "setup:ml": "node scripts/ml.mjs setup",
+    "train:ml": "node scripts/ml.mjs train",
+    "dataset:ml": "node scripts/ml.mjs dataset",
+    "evaluate:ml": "node scripts/ml.mjs evaluate",
+    "test:ml": "node scripts/ml.mjs test",
+    "test:server": "npm --prefix server test",
+    "test": "npm run test:ml && npm run test:server",
+    "dev:ml": "node scripts/ml.mjs serve",
+    "dev:server": "npm --prefix server run dev",
+    "dev:web": "npm --prefix web run dev",
+    "dev:lite": "node scripts/dev-lite.mjs",
+    "dev": "concurrently -k -n ml,api,web -c magenta,cyan,green \"npm run dev:ml\" \"npm run dev:server\" \"npm run dev:web\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "method": "expanding-window time-series CV on train+validation; ablation on the future test set",
+  "folds": [
+    {
+      "fold": 1,
+      "trainRows": 20630,
+      "testRows": 20630,
+      "testFraud": 963,
+      "prAuc": 0.7849,
+      "precision": 0.6445,
+      "recall": 0.8245
+    },
+    {
+      "fold": 2,
+      "trainRows": 41260,
+      "testRows": 20630,
+      "testFraud": 888,
+      "prAuc": 0.9635,
+      "precision": 0.9186,
+      "recall": 0.8773
+    },
+    {
+      "fold": 3,
+      "trainRows": 61890,
+      "testRows": 20630,
+      "testFraud": 1255,
+      "prAuc": 0.9922,
+      "precision": 0.9923,
+      "recall": 0.9235
+    },
+    {
+      "fold": 4,
+      "trainRows": 82520,
+      "testRows": 20630,
+      "testFraud": 1099,
+      "prAuc": 0.9881,
+      "precision": 0.9683,
+      "recall": 0.9445
+    }
+  ],
+  "summary": {
+    "prAuc": {
+      "mean": 0.9322,
+      "std": 0.0857
+    },
+    "precision": {
+      "mean": 0.8809,
+      "std": 0.1391
+    },
+    "recall": {
+      "mean": 0.8925,
+      "std": 0.0462
+    }
+  },
+  "ablation": [
+    {
+      "configuration": "all features",
+      "features": 39,
+      "prAuc": 0.9966,
+      "coldStartPrAuc": 0.9821
+    },
+    {
+      "configuration": "without graph",
+      "features": 33,
+      "prAuc": 0.9931,
+      "coldStartPrAuc": 0.9687
+    },
+    {
+      "configuration": "without complaints",
+      "features": 36,
+      "prAuc": 0.9955,
+      "coldStartPrAuc": 0.9867
+    },
+    {
+      "configuration": "without recipient_velocity_and_history",
+      "features": 30,
+      "prAuc": 0.972,
+      "coldStartPrAuc": 0.9493
+    },
+    {
+      "configuration": "without device_and_network",
+      "features": 30,
+      "prAuc": 0.9968,
+      "coldStartPrAuc": 0.9849
+    }
+  ],
+  "caveat": "Synthetic data: many independent fraud traces make it easier than production traffic."
+}

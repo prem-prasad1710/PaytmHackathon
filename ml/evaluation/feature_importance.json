@@ -1,0 +1,275 @@
+[
+  {
+    "feature": "recipient_account_age_days",
+    "label": "Recipient account age",
+    "meanAbsContribution": 2.8983,
+    "importanceShare": 0.2285,
+    "gainShare": 0.0515
+  },
+  {
+    "feature": "recipient_transaction_count",
+    "label": "Recipient payment history",
+    "meanAbsContribution": 0.9488,
+    "importanceShare": 0.0748,
+    "gainShare": 0.0023
+  },
+  {
+    "feature": "graph_degree",
+    "label": "Network connections",
+    "meanAbsContribution": 0.9203,
+    "importanceShare": 0.0726,
+    "gainShare": 0.0053
+  },
+  {
+    "feature": "recipient_device_age",
+    "label": "Recipient device age",
+    "meanAbsContribution": 0.7797,
+    "importanceShare": 0.0615,
+    "gainShare": 0.0089
+  },
+  {
+    "feature": "transactions_last_24hr",
+    "label": "Payments received in last 24 hours",
+    "meanAbsContribution": 0.6681,
+    "importanceShare": 0.0527,
+    "gainShare": 0.0297
+  },
+  {
+    "feature": "unique_senders_to_recipient",
+    "label": "Distinct people paying recipient",
+    "meanAbsContribution": 0.6591,
+    "importanceShare": 0.052,
+    "gainShare": 0.0021
+  },
+  {
+    "feature": "sender_prior_payments_to_recipient",
+    "label": "Earlier payments to recipient",
+    "meanAbsContribution": 0.6489,
+    "importanceShare": 0.0512,
+    "gainShare": 0.0089
+  },
+  {
+    "feature": "amount",
+    "label": "Payment amount",
+    "meanAbsContribution": 0.5599,
+    "importanceShare": 0.0441,
+    "gainShare": 0.0069
+  },
+  {
+    "feature": "amount_last_24hr",
+    "label": "Money received in last 24 hours",
+    "meanAbsContribution": 0.4483,
+    "importanceShare": 0.0353,
+    "gainShare": 0.013
+  },
+  {
+    "feature": "hour_of_day",
+    "label": "Time of day",
+    "meanAbsContribution": 0.4231,
+    "importanceShare": 0.0334,
+    "gainShare": 0.0034
+  },
+  {
+    "feature": "amount_zscore",
+    "label": "Unusual amount for sender",
+    "meanAbsContribution": 0.4177,
+    "importanceShare": 0.0329,
+    "gainShare": 0.0069
+  },
+  {
+    "feature": "recipient_complaint_rate",
+    "label": "Recipient complaint rate",
+    "meanAbsContribution": 0.3535,
+    "importanceShare": 0.0279,
+    "gainShare": 0.2909
+  },
+  {
+    "feature": "graph_risk_score",
+    "label": "Graph risk",
+    "meanAbsContribution": 0.3294,
+    "importanceShare": 0.026,
+    "gainShare": 0.0111
+  },
+  {
+    "feature": "sender_pass_through_ratio",
+    "label": "Sender forwarding funds just received",
+    "meanAbsContribution": 0.3251,
+    "importanceShare": 0.0256,
+    "gainShare": 0.0943
+  },
+  {
+    "feature": "amount_growth_vs_prior",
+    "label": "Amount escalation to recipient",
+    "meanAbsContribution": 0.266,
+    "importanceShare": 0.021,
+    "gainShare": 0.0044
+  },
+  {
+    "feature": "ip_user_count",
+    "label": "Accounts sharing recipient's network",
+    "meanAbsContribution": 0.2576,
+    "importanceShare": 0.0203,
+    "gainShare": 0.0049
+  },
+  {
+    "feature": "velocity_zscore",
+    "label": "Unusual payment speed for sender",
+    "meanAbsContribution": 0.2254,
+    "importanceShare": 0.0178,
+    "gainShare": 0.0015
+  },
+  {
+    "feature": "sender_device_age",
+    "label": "Sender device age",
+    "meanAbsContribution": 0.2069,
+    "importanceShare": 0.0163,
+    "gainShare": 0.0077
+  },
+  {
+    "feature": "new_recipient",
+    "label": "First payment to this recipient",
+    "meanAbsContribution": 0.1879,
+    "importanceShare": 0.0148,
+    "gainShare": 0.0052
+  },
+  {
+    "feature": "day_of_week",
+    "label": "Day of week",
+    "meanAbsContribution": 0.1725,
+    "importanceShare": 0.0136,
+    "gainShare": 0.0016
+  },
+  {
+    "feature": "recipient_complaint_count",
+    "label": "Complaints against recipient",
+    "meanAbsContribution": 0.1483,
+    "importanceShare": 0.0117,
+    "gainShare": 0.0244
+  },
+  {
+    "feature": "time_since_last_transaction",
+    "label": "Time since sender's last payment",
+    "meanAbsContribution": 0.1212,
+    "importanceShare": 0.0096,
+    "gainShare": 0.0011
+  },
+  {
+    "feature": "transactions_last_5min",
+    "label": "Payments received in last 5 minutes",
+    "meanAbsContribution": 0.0982,
+    "importanceShare": 0.0077,
+    "gainShare": 0.01
+  },
+  {
+    "feature": "transactions_last_1hr",
+    "label": "Payments received in last hour",
+    "meanAbsContribution": 0.0928,
+    "importanceShare": 0.0073,
+    "gainShare": 0.018
+  },
+  {
+    "feature": "sender_account_age_days",
+    "label": "Sender account age",
+    "meanAbsContribution": 0.086,
+    "importanceShare": 0.0068,
+    "gainShare": 0.0013
+  },
+  {
+    "feature": "connected_victims",
+    "label": "Connected victims",
+    "meanAbsContribution": 0.0832,
+    "importanceShare": 0.0066,
+    "gainShare": 0.0292
+  },
+  {
+    "feature": "same_amount_ratio",
+    "label": "Repeated identical amounts",
+    "meanAbsContribution": 0.0773,
+    "importanceShare": 0.0061,
+    "gainShare": 0.0165
+  },
+  {
+    "feature": "distance_to_blocked_entity",
+    "label": "Distance to blocked account",
+    "meanAbsContribution": 0.0573,
+    "importanceShare": 0.0045,
+    "gainShare": 0.0154
+  },
+  {
+    "feature": "device_user_count",
+    "label": "Accounts sharing recipient's device",
+    "meanAbsContribution": 0.0553,
+    "importanceShare": 0.0044,
+    "gainShare": 0.0043
+  },
+  {
+    "feature": "unique_devices",
+    "label": "Devices used by sender",
+    "meanAbsContribution": 0.046,
+    "importanceShare": 0.0036,
+    "gainShare": 0.0031
+  },
+  {
+    "feature": "amount_last_1hr",
+    "label": "Money received in last hour",
+    "meanAbsContribution": 0.0434,
+    "importanceShare": 0.0034,
+    "gainShare": 0.0033
+  },
+  {
+    "feature": "new_device",
+    "label": "Unrecognised device",
+    "meanAbsContribution": 0.0243,
+    "importanceShare": 0.0019,
+    "gainShare": 0.0167
+  },
+  {
+    "feature": "sender_device_user_count",
+    "label": "Accounts on sender's device",
+    "meanAbsContribution": 0.0234,
+    "importanceShare": 0.0018,
+    "gainShare": 0.0008
+  },
+  {
+    "feature": "fund_transfer_velocity",
+    "label": "Rapid fund movement",
+    "meanAbsContribution": 0.0114,
+    "importanceShare": 0.0009,
+    "gainShare": 0.252
+  },
+  {
+    "feature": "unique_ips",
+    "label": "Networks used by sender",
+    "meanAbsContribution": 0.009,
+    "importanceShare": 0.0007,
+    "gainShare": 0.0019
+  },
+  {
+    "feature": "connected_scam_accounts",
+    "label": "Connected flagged accounts",
+    "meanAbsContribution": 0.0068,
+    "importanceShare": 0.0005,
+    "gainShare": 0.0394
+  },
+  {
+    "feature": "connected_blocked_accounts",
+    "label": "Connected blocked accounts",
+    "meanAbsContribution": 0.0024,
+    "importanceShare": 0.0002,
+    "gainShare": 0.0022
+  },
+  {
+    "feature": "new_ip",
+    "label": "Unrecognised network",
+    "meanAbsContribution": 0.0,
+    "importanceShare": 0.0,
+    "gainShare": 0.0
+  },
+  {
+    "feature": "sender_transactions_last_1hr",
+    "label": "Sender payments in last hour",
+    "meanAbsContribution": 0.0,
+    "importanceShare": 0.0,
+    "gainShare": 0.0
+  }
+]
