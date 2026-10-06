@@ -25,3 +25,4 @@ mobile/.expo/
 .DS_Store
 coverage/
 .nyc_output/
+logs/
