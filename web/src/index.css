@@ -1926,3 +1926,13 @@ code {
 }
 .family-item.active { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(0,186,242,0.2); }
 .family-ask { border-left: 4px solid var(--purple); }
+.mule-path-banner {
+  padding: 0.75rem 0.9rem; border-radius: 14px; border: 1px solid var(--danger-border);
+  background: var(--danger-bg); color: var(--danger-text);
+}
+.mule-hops { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+.net-edge-mule { stroke: #dc2626; stroke-width: 3.5; opacity: 1; }
+.net-amount { fill: #dc2626; font-size: 11px; font-weight: 700; }
+.net-node.net-mule circle { fill: #fecaca; stroke: #dc2626; stroke-width: 2; }
+.dot-mule { background: #dc2626; }
+.line-key.mule { border-top: 3px solid #dc2626; }

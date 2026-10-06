@@ -116,7 +116,7 @@ export function analyzeGraph(ledger, recipientId) {
 /** Subgraph around an account for the "Investigate Network" view. */
 export function buildNetwork(ledger, rootId, { maxNodes = 36, maxPayers = 10 } = {}) {
   const root = ledger.accounts.get(rootId);
-  if (!root) return { nodes: [], edges: [], summary: null };
+  if (!root) return { nodes: [], edges: [], summary: null, mulePath: null };
   const nodes = new Map();
   const edges = [];
   const addNode = (id, hop, role) => {
@@ -131,12 +131,13 @@ export function buildNetwork(ledger, rootId, { maxNodes = 36, maxPayers = 10 } =
       complaints: a?.complaints || 0,
       payments: a?.nIn || 0,
       senders: a?.senders.size || 0,
+      nOut: a?.nOut || 0,
     });
     return true;
   };
-  const link = (source, target, type, weight = 1) => {
+  const link = (source, target, type, weight = 1, meta = {}) => {
     if (nodes.has(source) && nodes.has(target) && !edges.some((e) => e.source === source && e.target === target && e.type === type)) {
-      edges.push({ source, target, type, weight });
+      edges.push({ source, target, type, weight, ...meta });
     }
   };
 
@@ -168,16 +169,60 @@ export function buildNetwork(ledger, rootId, { maxNodes = 36, maxPayers = 10 } =
     link(id, rootId, "payment", total);
   }
 
+  // Fund-forward / mule hops: follow outgoing payments from the recipient
+  const mulePath = [];
+  const seen = new Set([rootId]);
+  let cursor = rootId;
+  let hop = 0;
+  while (hop < 4) {
+    const acct = ledger.accounts.get(cursor);
+    if (!acct || !acct.outAdj?.size) break;
+    // Pick the largest recent outgoing destination
+    const outTotals = new Map();
+    for (const e of acct.outEv || []) {
+      // outEv only has {ts, amount} — recover counterparties from outAdj order + events store
+    }
+    // Use outAdj keys; estimate amount from contacts on the sender side isn't on recipient.
+    // Walk ledger events for outgoing txs from cursor.
+    const forwards = [];
+    for (const ev of ledger.events) {
+      if (ev.type === "transaction" && ev.sender_id === cursor) {
+        forwards.push({ id: ev.recipient_id, amount: ev.amount, ts: ev.ts });
+      }
+    }
+    if (!forwards.length) break;
+    // Aggregate by recipient, take top
+    const agg = new Map();
+    for (const f of forwards) {
+      const cur = agg.get(f.id) || { id: f.id, amount: 0, ts: 0 };
+      cur.amount += f.amount;
+      cur.ts = Math.max(cur.ts, f.ts);
+      agg.set(f.id, cur);
+    }
+    const next = [...agg.values()].sort((a, b) => b.amount - a.amount)[0];
+    if (!next || seen.has(next.id)) break;
+    seen.add(next.id);
+    hop += 1;
+    addNode(next.id, hop, ledger.accounts.get(next.id)?.blockedTs != null ? "blocked" : "mule");
+    link(cursor, next.id, "fund_forward", next.amount, { mule: true, hop });
+    mulePath.push({ from: cursor, to: next.id, amount: next.amount, hop });
+    cursor = next.id;
+  }
+
   const list = [...nodes.values()];
+  const muleAmount = mulePath.reduce((s, h) => s + h.amount, 0);
   return {
     nodes: list,
     edges,
+    mulePath,
     summary: {
       accounts: list.length,
       blocked: list.filter((n) => n.blocked).length,
       flagged: list.filter((n) => n.flagged).length,
       payers: list.filter((n) => n.role === "payer").length,
       victimsReported: root.reporters.size,
+      muleHops: mulePath.length,
+      muleAmount: Math.round(muleAmount),
     },
   };
 }

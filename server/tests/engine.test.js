@@ -7,7 +7,8 @@ import { loadFraudConfig } from "../fraud/config.js";
 import { loadWorld } from "../fraud/world.js";
 import { MockMLService, DisabledMLService, PythonMLService } from "../fraud/mlService.js";
 import { TransactionSimulator } from "../fraud/simulator.js";
-import { analyzeGraph } from "../fraud/graphEngine.js";
+import { analyzeGraph, buildNetwork } from "../fraud/graphEngine.js";
+import { Ledger } from "../fraud/ledger.js";
 import { evaluateRules } from "../fraud/ruleEngine.js";
 import { createFraudRouter } from "../fraud/routes.js";
 
@@ -289,4 +290,21 @@ test("API: valid evaluate, invalid evaluate, scenario, stream, network, overview
     assert.equal(overview.monitoring.prediction_count >= 5, true);
     assert.equal(overview.metrics, null, "mock ML exposes no model metrics");
   });
+});
+
+
+test("buildNetwork exposes fund-forward mule hops with amounts", () => {
+  const ledger = new Ledger();
+  const base = 1_700_000_000;
+  ledger.apply({ type: "account_created", account_id: "scammer@upi", ts: base });
+  ledger.apply({ type: "account_created", account_id: "mule1@upi", ts: base });
+  ledger.apply({ type: "account_created", account_id: "cashout@upi", ts: base });
+  ledger.apply({ type: "transaction", ts: base + 10, amount: 900, sender_id: "victim", recipient_id: "scammer@upi", device_id: "d1", ip_id: "i1" });
+  ledger.apply({ type: "transaction", ts: base + 20, amount: 850, sender_id: "scammer@upi", recipient_id: "mule1@upi", device_id: "d2", ip_id: "i2" });
+  ledger.apply({ type: "transaction", ts: base + 30, amount: 800, sender_id: "mule1@upi", recipient_id: "cashout@upi", device_id: "d3", ip_id: "i3" });
+  const net = buildNetwork(ledger, "scammer@upi");
+  assert.ok(net.mulePath.length >= 1);
+  assert.equal(net.mulePath[0].to, "mule1@upi");
+  assert.ok(net.summary.muleHops >= 1);
+  assert.ok(net.edges.some((e) => e.type === "fund_forward"));
 });
