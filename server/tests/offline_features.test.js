@@ -3,6 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { finalizeAnalysis, pickMockByText, SCENARIO_LIST } from "../../shared/offlineEngine.js";
 import { buildMessageDualExplain } from "../../shared/dualExplain.js";
+import { suggestSafeReplies } from "../../shared/safeReplies.js";
 
 function run(id) {
   const s = SCENARIO_LIST.find((x) => x.id === id);
@@ -62,4 +63,14 @@ test("Tamil and Bengali samples are High Risk", () => {
   assert.equal(bn.risk, "High Risk");
   assert.ok(String(ta.detected_language).startsWith("ta"));
   assert.ok(String(bn.detected_language).startsWith("bn"));
+});
+
+
+test("safe replies only for High Risk and never auto-send", () => {
+  const hi = suggestSafeReplies({ risk: "High Risk", playbook: { playbookId: "fake_kyc" } });
+  assert.equal(hi.show, true);
+  assert.ok(hi.replies.length >= 2);
+  assert.equal(hi.helpline.phone, "1930");
+  const safe = suggestSafeReplies({ risk: "Safe" });
+  assert.equal(safe.show, false);
 });

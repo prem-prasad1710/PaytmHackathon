@@ -1936,3 +1936,14 @@ code {
 .net-node.net-mule circle { fill: #fecaca; stroke: #dc2626; stroke-width: 2; }
 .dot-mule { background: #dc2626; }
 .line-key.mule { border-top: 3px solid #dc2626; }
+.safe-replies { border-left: 4px solid var(--safe); margin-top: 0.75rem; }
+.reply-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.65rem; }
+.reply-card {
+  border: 1px solid var(--border); border-radius: 12px; padding: 0.75rem; background: var(--card);
+  display: grid; gap: 0.35rem; align-content: start;
+}
+.helpline-card {
+  margin-top: 0.75rem; padding: 0.85rem 1rem; border-radius: 14px;
+  background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger-text);
+}
+.helpline-card a { color: inherit; font-weight: 700; }

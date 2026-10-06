@@ -7,6 +7,7 @@ import Findings from "./Findings.jsx";
 import PlaybookTimeline from "./fraud/PlaybookTimeline.jsx";
 import StatusBadge, { inferStatusMode } from "./StatusBadge.jsx";
 import DualExplain from "./DualExplain.jsx";
+import SafeReplies from "./SafeReplies.jsx";
 import { riskClass, riskColor } from "../utils/riskStyles";
 
 export default function RiskCard({ result, sourceText, extraFindings, extraFindingsTitle, onPrimary, onSecondary }) {
@@ -68,6 +69,8 @@ export default function RiskCard({ result, sourceText, extraFindings, extraFindi
       {result.playbook && <PlaybookTimeline playbook={result.playbook} />}
 
       {result.dual && <DualExplain dual={result.dual} />}
+
+      <SafeReplies result={result} sourceText={sourceText} />
 
       <ExplainPanel result={result} />
 
