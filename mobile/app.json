@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Paytm Scam Shield",
+    "slug": "paytm-scam-shield",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.paytm.scamshield",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#002970",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
