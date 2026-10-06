@@ -131,15 +131,40 @@ Decision object:
 
 The text model lives in `ml/text_model/` (`/text/predict`, `/text/transaction`, `/text/metrics`); its numbers are on the in-app **Model** page.
 
-## Grok API (optional)
+## Live stack (recommended for demos)
+
+```bash
+npm run setup:js          # once
+npm run dev:live          # ML :8001 + API :8787 + web :5173 (foreground)
+# or background (leaves processes running):
+npm run dev:live:bg       # PIDs + logs in logs/ ; stop with bash logs/STOP.sh
+```
+
+- Web: set `VITE_USE_MOCK=false` in `web/.env` (empty `VITE_API_URL` uses the Vite `/api` proxy → `:8787`).
+- Mobile: `EXPO_PUBLIC_USE_MOCK=false` and `EXPO_PUBLIC_API_URL=http://<Mac-LAN-IP>:8787`.
+- Health: [http://127.0.0.1:8787/api/health](http://127.0.0.1:8787/api/health) reports `ml`, `llm` (provider + live), and bind `0.0.0.0`.
+- Judge walkthrough: see [docs/FEATURES.md](docs/FEATURES.md).
+
+## LLM provider — Groq or Grok (optional)
+
+The LLM may **only assist / rephrase**. Fraud verdicts stay with ML + graph + rules + offline templates.
 
 ```env
-# server/.env
-GROK_API_KEY=xai-your-real-key
-GROK_MODEL=grok-4-latest
+# server/.env  (Prem adds his own keys locally — never commit real keys)
+LLM_PROVIDER=groq
+GROQ_API_KEY=           # from https://console.groq.com/keys
+GROQ_MODEL=llama-3.3-70b-versatile
+
+# Or use xAI Grok instead:
+# LLM_PROVIDER=grok
+# GROK_API_KEY=
+# GROK_MODEL=grok-4-latest
+
 PORT=8787
 ML_SERVICE_URL=http://127.0.0.1:8001
 ```
+
+Resolution if `LLM_PROVIDER` is unset: **Groq key → Grok key → none (offline)**. Timeouts fall back to the offline engine automatically.
 
 ## Demo script (4 minutes)
 

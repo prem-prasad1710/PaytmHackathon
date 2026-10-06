@@ -17,7 +17,9 @@
     "dev:server": "npm --prefix server run dev",
     "dev:web": "npm --prefix web run dev",
     "dev:lite": "node scripts/dev-lite.mjs",
-    "dev": "concurrently -k -n ml,api,web -c magenta,cyan,green \"npm run dev:ml\" \"npm run dev:server\" \"npm run dev:web\""
+    "dev": "concurrently -k -n ml,api,web -c magenta,cyan,green \"npm run dev:ml\" \"npm run dev:server\" \"npm run dev:web\"",
+    "dev:live": "node scripts/dev-live.mjs",
+    "dev:live:bg": "node scripts/dev-live-bg.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

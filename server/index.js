@@ -21,6 +21,7 @@ import {
 import { addReport, getStats } from "./reports.js";
 import { FraudEngine } from "./fraud/engine.js";
 import { createFraudRouter } from "./fraud/routes.js";
+import { chatCompletion, llmStatus, resolveLlmConfig } from "./llmClient.js";
 import {
   listTrustedContacts,
   createApprovalRequest,
@@ -32,22 +33,18 @@ import {
 
 const app = express();
 const PORT = Number(process.env.PORT || 8787);
-const GROK_API_URL = process.env.GROK_API_URL || "https://api.x.ai/v1/chat/completions";
-const GROK_MODEL = process.env.GROK_MODEL || "grok-4-latest";
-
 if (String(process.env.ALLOW_INSECURE_TLS || "").toLowerCase() === "true") {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
   console.warn("ALLOW_INSECURE_TLS=true — TLS verification disabled");
 }
 
-function getApiKey() {
-  const key = String(process.env.GROK_API_KEY || "").trim();
-  if (!key) return null;
-  if (/your-key|your_key|changeme|xxx|placeholder/i.test(key)) return null;
-  return key;
-}
+const llmCfg = () => resolveLlmConfig();
+const llmLive = () => llmCfg().provider !== "none";
 
-app.use(cors());
+app.use(cors({
+  origin: true, // reflect request origin (localhost Vite + LAN Expo/web)
+  credentials: true,
+}));
 app.use(express.json({ limit: "1mb" }));
 const fraudEngine = new FraudEngine();
 fraudEngine.warmUp();
@@ -81,7 +78,7 @@ app.post("/api/family/:id/decide", (req, res) => {
 
 
 app.get("/", (_req, res) => {
-  const grok = Boolean(getApiKey());
+  const llm = llmStatus();
   res.type("html").send(`<!doctype html>
 <html lang="en">
 <head>
@@ -103,7 +100,7 @@ app.get("/", (_req, res) => {
     <h1>Paytm Scam Shield API</h1>
     <p>Server is running. This port is the <strong>backend API</strong>, not the UI.</p>
     <p>Status:
-      <span class="${grok ? "ok" : "warn"}">${grok ? "Live Grok configured" : "Offline engine active (no Grok key)"}</span>
+      <span class="${llm.live ? "ok" : "warn"}">${llm.live ? `Live LLM: ${llm.provider} (${llm.model})` : "Offline engine (no LLM key)"}</span>
     </p>
     <h3>Open the apps</h3>
     <ul>
@@ -117,12 +114,24 @@ app.get("/", (_req, res) => {
 });
 
 app.get("/api/health", async (_req, res) => {
+  const ml = await mlHealth();
+  const fraudHealth = await fraudEngine.ml.health().catch(() => ({ available: false }));
+  const llm = llmStatus();
   res.json({
     ok: true,
-    grokConfigured: Boolean(getApiKey()),
-    model: GROK_MODEL,
+    llm,
+    grokConfigured: llm.provider === "grok", // backward-compatible alias
+    model: llm.model,
     offlineEngine: true,
-    mlAvailable: Boolean(await mlHealth()),
+    mlAvailable: Boolean(ml) || Boolean(fraudHealth?.available),
+    ml: {
+      textService: Boolean(ml),
+      fraudService: Boolean(fraudHealth?.available),
+      url: process.env.ML_SERVICE_URL || "http://127.0.0.1:8001",
+      detail: fraudHealth || null,
+    },
+    familyApprovals: true,
+    bind: "0.0.0.0",
   });
 });
 
@@ -175,79 +184,71 @@ app.post("/api/analyze", async (req, res) => {
   }
 
   const ml = await mlPredict(text);
+  const llm = llmStatus();
   const respond = (result, meta) => {
     const final = finalizeAnalysis(result, text, meta);
-    return res.json({ ...blendWithMl(final, ml), ml_available: Boolean(ml) });
+    const blended = blendWithMl(final, ml);
+    return res.json({
+      ...blended,
+      ml_available: Boolean(ml),
+      llm_provider: meta.llmProvider || llm.provider,
+    });
   };
 
-  const apiKey = getApiKey();
-  if (!apiKey) {
+  if (!llmLive()) {
     return respond(pickMockByText(text), {
       source: "mock",
-      message: ml ? "Rules + ML model (no Grok key)" : "Offline Shield engine (no Grok key)",
+      message: ml
+        ? "Rules + ML model (no LLM key)"
+        : "Offline Shield engine (no LLM key)",
+      llmProvider: "none",
     });
   }
 
   try {
-    const grokRes = await fetch(GROK_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: GROK_MODEL,
-        temperature: 0.2,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: buildUserPrompt(text) },
-        ],
-      }),
+    const out = await chatCompletion({
+      system: SYSTEM_PROMPT,
+      user: buildUserPrompt(text),
     });
-
-    const rawBody = await grokRes.text();
-    if (!grokRes.ok) {
-      console.error("Grok API error:", grokRes.status, rawBody);
+    if (!out.ok) {
+      console.error("LLM error:", out.provider, out.error, out.detail || "");
       return respond(pickMockByText(text), {
         source: "mock",
-        message: `Grok failed (${grokRes.status}) — offline response`,
+        message: `LLM (${out.provider}) failed (${out.error}) — offline response`,
+        llmProvider: out.provider,
       });
     }
-
-    let data;
-    try {
-      data = JSON.parse(rawBody);
-    } catch {
-      data = null;
-    }
-
-    const content = data?.choices?.[0]?.message?.content || "";
-    const parsed = safeParseJson(content);
+    const parsed = safeParseJson(out.content);
     if (!parsed) {
       return respond(pickMockByText(text), {
         source: "mock",
-        message: "Grok parse failed — offline response",
+        message: `LLM (${out.provider}) parse failed — offline response`,
+        llmProvider: out.provider,
       });
     }
-
+    // Source tag for UI badge: groq | grok (LLM assist). Engines still own the blended verdict.
     return respond(parsed, {
-      source: "grok",
-      model: data?.model || GROK_MODEL,
+      source: out.provider === "groq" ? "groq" : "grok",
+      model: out.model,
+      message: `Live ${out.provider} assist · engines keep the verdict`,
+      llmProvider: out.provider,
     });
   } catch (err) {
     console.error("analyze error:", err);
     return respond(pickMockByText(text), {
       source: "mock",
       message: "Network error — offline response",
+      llmProvider: llm.provider,
     });
   }
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Scam Shield API on http://127.0.0.1:${PORT}`);
+  const llm = llmStatus();
+  console.log(`Scam Shield API on http://127.0.0.1:${PORT} (bound 0.0.0.0 — LAN phones OK)`);
   console.log(
-    getApiKey()
-      ? `Grok connected · model=${GROK_MODEL}`
-      : "Offline engine active (no Grok key) — full mock responses ON"
+    llm.live
+      ? `LLM live · provider=${llm.provider} · model=${llm.model}`
+      : "No LLM key — rules/ML offline path ON. Add GROQ_API_KEY (console.groq.com/keys) or GROK_API_KEY in server/.env"
   );
 });

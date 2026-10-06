@@ -1,111 +1,48 @@
-# Paytm Scam Shield — Phase 2 features (for judges)
+# Paytm Scam Shield — Features for judges
 
-Built 2026-10-06 on top of the hybrid **ML + Graph + Rules** engine. These features are designed so the demo does **not** feel like a generic fraud classifier: it narrates the scam, names the playbook stage, explains in Hinglish, and can run with **no Grok key**.
+Built for a Paytm internal hackathon: **stops the scam conversation before money moves**, explains in the user's language, and can involve family — not a generic fraud classifier scorecard.
 
-## How to run the demo
+## Judge pitch (30 seconds)
 
-```bash
-export PATH="$HOME/.nvm/versions/node/v24.19.0/bin:$PATH"
-cd /Users/premprasad/Downloads/Paytm-Scam-Shield-Hackathon
-npm run setup:js          # if needed
-npm run dev:lite          # API :8787 + web :5173 (ML optional)
-# optional full: npm run dev
-```
+**Problem.** UPI scams are scripts (fake KYC, digital arrest, collect-as-receive). Victims are coached on a call while they pay. A single model score arrives too late and cannot explain itself in Hinglish.
 
-Open **http://127.0.0.1:5173/demo** or click **▶ Judge demo** on Home / Navbar **Demo**.
+**Why this is different.** Three engines (ML + graph + rules) decide. GenAI/Groq/Grok may only rephrase. A **playbook timeline** shows which stage of a known India scam script the user is in. **Coercion flags** catch AnyDesk / "mat batana". **Family Guardian** lets Mom decline a risky pay. **Judge demo** walks the whole story offline or live.
 
----
+## 3-minute demo script
 
-## 1. Live judge demo mode
+1. Open **http://127.0.0.1:5173/demo** → Play judge demo (message → signals → playbook → BLOCK → coaching Guardian → Family decline → outcome).
+2. **Check** → Fake KYC / Hindi digital-arrest / Tamil chips → High Risk, playbook, dual explain, safe replies + 1930 card, status badge.
+3. **Lab** → Scam case → Investigate Network → red **fund-forward mule hops** with ₹ amounts.
+4. **Confirm Pay** (from Caution/High path) → time-lock + optional Family approval → open **/family** and Decline.
+5. Optional: stop API → Analyze still works **on-device offline**.
 
-**What:** One-click scripted story — digital arrest call → AnyDesk → ₹1 KYC collect → BLOCK → Guardian. Pause / Next / Reset. **Works fully offline** (no API, no Grok).
+## Feature index
 
-**Where:** `/demo` or Fraud Lab → “Start judge demo”. Navbar **Demo**.
+| Feature | Where | Commit hint |
+|---------|-------|-------------|
+| Judge demo | `/demo`, Navbar Demo | `af26e31` |
+| Playbook timeline | Analyze + Lab | `c7c3348` |
+| Dual explanations | Analyze + DecisionCard | `0ca9bcc` |
+| First-time payee time-lock | Confirm Pay | `021b4c2` |
+| Coercion / coaching | Guardian overlay | `b15698f` |
+| Status badge | Analyze / Lab | `b15698f` |
+| Family Guardian | `/family`, Confirm Pay | `835d5f5` |
+| Money-mule graph | Lab → Investigate Network | `838b56c` |
+| Regional languages | Sample chips (Hindi/Tamil/Bengali/Marathi) | `19bc89d` |
+| Safe replies + 1930 | High Risk Analyze | `550df85` |
+| Mobile parity | Expo Analyze / ConfirmPay | `70842c1` |
+| Live stack + Groq/Grok LLM | `npm run dev:live` | (this batch) |
 
-**Files:** `shared/judgeScript.js`, `web/src/components/fraud/JudgeDemo.jsx`, `web/src/pages/FraudLab.jsx`
+## Live vs offline
 
-**Commit:** `af26e31`
+- **Live:** `VITE_USE_MOCK=false`, API `:8787`, ML `:8001`. Badge: **Full stack** when ML is up.
+- **LLM (optional):** `GROQ_API_KEY` (preferred) or `GROK_API_KEY` in `server/.env`. Provider shown on `/api/health` → `llm`. LLM never changes the verdict.
+- **Offline fallback:** stop the API → web Analyze still returns template/playbook/coercion results.
 
----
+## Regression demos
 
-## 2. Scammer's playbook timeline
-
-**What:** Six India UPI scripts (fake KYC / wrong-transfer refund / collect-as-receive / job-task / digital arrest / OLX QR). Detects stage and shows “you are at stage X of 5 — next they will ask Y”.
-
-**Where:** Analyze result card after pasting a KYC / coaching message; Fraud Lab decision card; judge demo step 3.
-
-**Files:** `shared/playbook.js`, `shared/offlineEngine.js` (`finalizeAnalysis`), `server/fraud/explainer.js`, `web/src/components/fraud/PlaybookTimeline.jsx`
-
-**Commit:** `c7c3348` (+ UI in `b15698f`)
-
----
-
-## 3. Dual plain-language explanations
-
-**What:** Side-by-side **For you (Hinglish)** and **Analyst / bank view** (signals, weights, rule IDs, model score). Deterministic templates. If Grok is configured later it may **only rephrase** user text — never change the verdict.
-
-**Where:** Analyze (`DualExplain` under RiskCard); Fraud Lab DecisionCard “Why?” area.
-
-**Files:** `shared/dualExplain.js`, `web/src/components/DualExplain.jsx`, `server/hybrid.js`, `server/fraud/explainer.js`
-
-**Commit:** `0ca9bcc`
-
----
-
-## 4. First-time payee time-lock
-
-**What:** Longer visible cooling-off (up to 45s) when the payee is new and risk is elevated/high, or large first payment (≥ ₹5000). Shows reasons; Confirm enabled only after countdown + acknowledgement.
-
-**Where:** Check a High Risk message → Continue/Confirm path → **Confirm Pay**.
-
-**Files:** `web/src/pages/ConfirmPay.jsx` (extends prior `COOLDOWN` / first-payee spirit of `LARGE_FIRST_PAYMENT`)
-
-**Commit:** `021b4c2`
-
----
-
-## 5. Pre-payment coercion / intent flags
-
-**What:** Detects “stay on the call”, “mat batana”, AnyDesk/TeamViewer/QuickSupport, police/CBI/RBI/customs, OTP/PIN asks (EN + Hinglish). Boosts score; Guardian title becomes **“Someone may be coaching you.”**
-
-**Where:** Analyze any coaching SMS → High Risk overlay; also chips on RiskCard.
-
-**Files:** `shared/coercion.js`, `shared/offlineEngine.js`, `web/src/components/GuardianOverlay.jsx`
-
-**Commits:** `c7c3348` (engine), `b15698f` (UI)
-
----
-
-## 6. Honest offline / live status badge
-
-**What:** Clear provenance: **Full stack** (server + ML), **Server only**, **On-device offline**, or **Live Grok**.
-
-**Where:** Every Analyze RiskCard; DecisionCard in Lab; judge demo header.
-
-**Files:** `web/src/components/StatusBadge.jsx`, `web/src/services/analyzeApi.js`, `web/src/components/RiskCard.jsx`
-
-**Commit:** `b15698f`
-
----
-
-## Regression demos (must still work)
-
-| Sample chip | Expected |
-|-------------|----------|
-| Electricity bill | **Safe** |
-| Emergency UPI | **Caution** |
-| Fake KYC SMS | **High Risk** + playbook `fake_kyc` |
-
-Covered by `server/tests/offline_features.test.js`.
-
----
-
-## Local git (no remote)
-
-```text
-b15698f feat: coaching Guardian, playbook on Analyze, honest status badge
-021b4c2 feat: stronger first-time payee time-lock on ConfirmPay
-0ca9bcc feat: dual plain-language explanations (user + analyst)
-c7c3348 feat: scammer playbook + coercion signals in offline engine
-af26e31 feat: live judge demo mode (offline scripted E2E)
-```
+| Sample | Expected |
+|--------|----------|
+| Electricity bill | Safe |
+| Emergency UPI | Caution |
+| Fake KYC SMS | High Risk + playbook `fake_kyc` |

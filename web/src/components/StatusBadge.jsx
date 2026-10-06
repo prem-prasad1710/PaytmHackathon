@@ -2,7 +2,8 @@ const MODES = {
   full: { label: "Full stack", hint: "Server + ML", tone: "safe" },
   server: { label: "Server only", hint: "API up · ML offline", tone: "warn" },
   offline: { label: "On-device offline", hint: "Rules engine on this device", tone: "muted" },
-  grok: { label: "Live Grok", hint: "LLM assist (verdict from engines)", tone: "info" },
+  grok: { label: "Live Grok", hint: "xAI LLM assist (verdict from engines)", tone: "info" },
+  groq: { label: "Live Groq", hint: "Groq LLM assist (verdict from engines)", tone: "info" },
 };
 
 /**
@@ -28,7 +29,10 @@ export default function StatusBadge({ mode = "offline", detail }) {
 /** Infer mode from an analyze/fraud API result. */
 export function inferStatusMode(result) {
   if (!result) return "offline";
+  if (result.llm_provider === "groq") return "groq";
+  if (result.llm_provider === "grok") return "grok";
   const src = result.source;
+  if (src === "groq") return "groq";
   if (src === "grok") return "grok";
   if (src === "mock" || src === "qr-analyzer") return "offline";
   if (src === "hybrid" || result.mlAvailable === true || result.ml?.available === true) return "full";
