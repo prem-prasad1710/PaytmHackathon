@@ -16,7 +16,7 @@ export const PLAYBOOKS = [
       { id: "collect", label: "Collect / ₹1 verify", labelHi: "कलेक्ट / ₹1 वेरिफाई", nextAsk: "Ask for a tiny UPI collect or prepaid 'verification' payment" },
       { id: "cashout", label: "PIN / OTP harvest", labelHi: "PIN/OTP चोरी", nextAsk: "Ask for UPI PIN, OTP or remote-access app" },
     ],
-    keywords: ["kyc", "केवाईसी", "account freeze", "block", "verify account", "electricity", "bijli", "disconnection", "kat jayegi", "expired"],
+    keywords: ["kyc", "केवाईसी", "account freeze", "verify account", "bijli kat", "disconnection", "kat jayegi", "power cut", "expired kyc", "kyc pending"],
   },
   {
     id: "wrong_transfer",
@@ -179,6 +179,11 @@ export function detectPlaybook(text = "", extras = {}) {
     if (!best || total > best.total) {
       best = { pb, total, hits };
     }
+  }
+
+  // Official billers / benign bill language should not become a KYC playbook match
+  if (/official biller|consumer no|due date|state electricity board/i.test(t)) {
+    if (best && best.pb.id === "fake_kyc" && best.total < 3) best = null;
   }
 
   if (!best || best.total < 1) return null;

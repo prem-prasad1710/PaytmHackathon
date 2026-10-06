@@ -144,10 +144,20 @@ export class FraudEngine {
         fundTransferVelocity: Number(facts.fundTransferVelocity.toFixed(2)),
       },
     };
-    const text = buildExplanation({ ...result, ml: result.ml, graph: result.graph, rules: { ...result.rules, ruleDetails: rules.ruleDetails }, aggregation });
+    const text = buildExplanation({
+      ...result,
+      ml: result.ml,
+      graph: result.graph,
+      rules: { ...result.rules, ruleDetails: rules.ruleDetails, triggeredRules: rules.triggeredRules },
+      aggregation,
+      transaction: result.transaction,
+      facts: result.facts,
+    });
     result.summary = text.summary;
     result.explanation = text.explanation;
     result.explanationSource = text.generatedBy;
+    if (text.playbook) result.playbook = text.playbook;
+    if (text.dual) result.dual = text.dual;
     result.latencyMs = Number((performance.now() - t0).toFixed(2));
     this.monitoring.record(result);
     return result;

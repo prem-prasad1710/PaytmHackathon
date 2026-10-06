@@ -3,6 +3,10 @@
  * Used by web, mobile, and server so Grok-less demos always work.
  */
 
+import { detectPlaybook } from "./playbook.js";
+import { detectCoercion } from "./coercion.js";
+import { buildMessageDualExplain } from "./dualExplain.js";
+
 export const SYSTEM_PROMPT = `You are "Paytm Scam Shield", a safety assistant for UPI and digital payments in India.
 
 Your job:
@@ -981,18 +985,76 @@ export function pickMockByText(text = "") {
   return enrichWithComplaints(response, trimmed);
 }
 
-/** Attach complaint enrichment to any live/offline result. */
+/** Attach complaint enrichment, playbook, coercion and dual explain to any result. */
 export function finalizeAnalysis(result, text, meta = {}) {
   const enriched = enrichWithComplaints(result || {}, text);
   const lang = result?.detected_language || detectLanguage(text);
-  return {
+  const coercion = detectCoercion(text);
+  const playbook = detectPlaybook(text, {
+    collect: Boolean(enriched.payment?.collect || /collect|request money/i.test(String(text || ""))),
+    coercionRemote: coercion.flags.some((f) => f.id === "screen_share"),
+    coercionAuthority: coercion.flags.some((f) => f.id === "authority_fear"),
+  });
+
+  let score = Number(enriched.score) || 0;
+  let risk = enriched.risk;
+  const red = [...(enriched.red_flags || [])];
+  const reasons = [...(enriched.reasons || [])];
+
+  if (coercion.detected) {
+    const serious = coercion.flags.filter((f) =>
+      ["stay_on_call", "secrecy", "screen_share", "authority_fear", "otp_pin", "coaching"].includes(f.id)
+    );
+    const boost = serious.length
+      ? Math.min(40, serious.reduce((s, f) => s + f.weight, 0))
+      : Math.min(8, coercion.scoreBoost); // urgency-alone stays mild
+    score = Math.min(100, score + boost);
+    for (const f of coercion.flags) {
+      if (!red.includes(f.id)) red.push(f.id);
+      reasons.unshift(f.labelHi + " / " + f.label);
+    }
+    // Escalate verdict only when coaching / remote-access / PIN harvest is present
+    if (coercion.coachingSuspected || serious.some((f) => ["screen_share", "otp_pin", "authority_fear"].includes(f.id))) {
+      if (score >= 55) risk = "High Risk";
+      else if (risk === "Safe") risk = "Caution";
+    } else if (score >= 35 && risk === "Safe") {
+      risk = "Caution";
+    }
+  }
+
+  if (playbook && !red.includes("playbook:" + playbook.playbookId)) {
+    red.push("playbook:" + playbook.playbookId);
+    reasons.unshift(playbook.youAreHereHi || playbook.youAreHere);
+  }
+
+  // Recompute safe_to_proceed from risk
+  const safe_to_proceed = risk === "Safe";
+  const suggested_ui =
+    risk === "High Risk"
+      ? { primary_button: "Block & Ignore", secondary_button: "Report Scam" }
+      : risk === "Caution"
+        ? { primary_button: "Verify First", secondary_button: "Continue Anyway" }
+        : enriched.suggested_ui;
+
+  const base = {
     ...enriched,
+    risk,
+    score,
+    reasons: reasons.slice(0, 8),
+    red_flags: red,
+    safe_to_proceed,
+    suggested_ui: suggested_ui || enriched.suggested_ui,
     detected_language: lang,
     matched_terms: result?.matched_terms || enriched.matched_terms || [],
     source: meta.source || enriched.source || "mock",
     message: meta.message || enriched.message,
     model: meta.model,
+    coercion: coercion.detected ? coercion : undefined,
+    playbook: playbook || undefined,
   };
+
+  base.dual = buildMessageDualExplain(base);
+  return base;
 }
 
 export function safeParseJson(content) {

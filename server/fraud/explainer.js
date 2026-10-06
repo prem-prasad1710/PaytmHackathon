@@ -1,5 +1,8 @@
 // Human-readable explanation. Pure template text built from the engines' own evidence.
-// It never changes the decision. (An LLM could rephrase this later; it is not required.)
+// It never changes the decision. (An LLM could rephrase user text later; it is not required.)
+
+import { buildPaymentDualExplain } from "../../shared/dualExplain.js";
+import { detectPlaybook } from "../../shared/playbook.js";
 
 const HEADLINE = {
   BLOCK: "Payment blocked",
@@ -7,7 +10,7 @@ const HEADLINE = {
   SAFE: "Payment looks safe",
 };
 
-export function buildExplanation({ decision, riskLevel, riskScore, ml, graph, rules, aggregation }) {
+export function buildExplanation({ decision, riskLevel, riskScore, ml, graph, rules, aggregation, transaction, facts }) {
   const lines = [];
 
   for (const o of aggregation.overridesApplied) {
@@ -29,5 +32,37 @@ export function buildExplanation({ decision, riskLevel, riskScore, ml, graph, ru
   const summary = `${HEADLINE[decision]} - risk ${riskScore}/100 (${riskLevel}). ${
     unique.length ? unique[0] : "No fraud indicators were found."
   }`;
-  return { summary, explanation: unique.length ? unique : ["No fraud indicators were found"], generatedBy: "template" };
+
+  // Infer playbook from recipient + rule context when message text is absent
+  const ctxText = [
+    transaction?.recipientId || "",
+    ...(rules.triggeredRules || []),
+    facts?.complaints > 5 ? "high complaints refund kyc" : "",
+    rules.triggeredRules?.includes("HIGH_VELOCITY") ? "mule rapid" : "",
+  ].join(" ");
+  const playbook = detectPlaybook(ctxText, {
+    collect: Boolean(transaction?.collect),
+  });
+
+  const partial = {
+    decision,
+    riskLevel,
+    riskScore,
+    ml,
+    graph,
+    rules: { triggeredRules: rules.triggeredRules || rules.triggeredRules, ...rules },
+    aggregation,
+    explanation: unique.length ? unique : ["No fraud indicators were found"],
+    explanationSource: "template",
+    playbook: playbook || undefined,
+  };
+  const dual = buildPaymentDualExplain(partial);
+
+  return {
+    summary,
+    explanation: unique.length ? unique : ["No fraud indicators were found"],
+    generatedBy: "template",
+    playbook: playbook || undefined,
+    dual,
+  };
 }
