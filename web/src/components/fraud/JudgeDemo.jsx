@@ -176,6 +176,22 @@ export default function JudgeDemo({ onClose, embedded = false }) {
             </div>
           )}
 
+
+          {step.kind === "family" && (
+            <div className="family-ask panel-inset" data-testid="judge-family">
+              <strong>Family Guardian</strong>
+              <p style={{ margin: "0.4rem 0" }}>
+                Approval request → <em>Priya Prasad (Mom)</em> for ₹1 collect to <code>kyc.verify@ibl</code>
+              </p>
+              <div className="chip-row">
+                <span className="chip chip-bad">Status: declined</span>
+                <span className="chip">offline / live inbox</span>
+              </div>
+              <p className="muted small">Guardian note: "Mat bhejo — cyber cell + AnyDesk classic scam."</p>
+              <Link className="btn btn-secondary" to="/family">Open Family inbox</Link>
+            </div>
+          )}
+
           {step.kind === "outcome" && (
             <div className="alert-banner" style={{ marginTop: "0.75rem" }}>
               <strong>Demo outcome: BLOCKED</strong>

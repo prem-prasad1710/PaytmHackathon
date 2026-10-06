@@ -21,6 +21,14 @@ import {
 import { addReport, getStats } from "./reports.js";
 import { FraudEngine } from "./fraud/engine.js";
 import { createFraudRouter } from "./fraud/routes.js";
+import {
+  listTrustedContacts,
+  createApprovalRequest,
+  getApproval,
+  decideApproval,
+  listPending,
+  listRecent,
+} from "./familyApprovals.js";
 
 const app = express();
 const PORT = Number(process.env.PORT || 8787);
@@ -44,6 +52,33 @@ app.use(express.json({ limit: "1mb" }));
 const fraudEngine = new FraudEngine();
 fraudEngine.warmUp();
 app.use("/api/fraud", createFraudRouter(fraudEngine));
+
+app.get("/api/family/contacts", (_req, res) => {
+  res.json({ contacts: listTrustedContacts() });
+});
+
+app.get("/api/family/pending", (_req, res) => {
+  res.json({ pending: listPending(), recent: listRecent(10) });
+});
+
+app.post("/api/family/request", (req, res) => {
+  const record = createApprovalRequest(req.body || {});
+  res.status(201).json({ ok: true, approval: record });
+});
+
+app.get("/api/family/:id", (req, res) => {
+  const record = getApproval(req.params.id);
+  if (!record) return res.status(404).json({ error: "not found" });
+  res.json({ approval: record });
+});
+
+app.post("/api/family/:id/decide", (req, res) => {
+  const out = decideApproval(req.params.id, req.body || {});
+  if (out.error === "not_found") return res.status(404).json(out);
+  if (out.error) return res.status(400).json(out);
+  res.json({ ok: true, approval: out.record });
+});
+
 
 app.get("/", (_req, res) => {
   const grok = Boolean(getApiKey());

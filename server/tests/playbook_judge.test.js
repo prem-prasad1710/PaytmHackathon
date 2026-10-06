@@ -34,7 +34,7 @@ test("detectCoercion flags screen-share and secrecy", () => {
 test("judge demo script has six offline steps and a BLOCK decision", () => {
   assert.ok(JUDGE_DEMO_META.title);
   const steps = getJudgeDemoSteps();
-  assert.equal(steps.length, 6);
+  assert.ok(steps.length >= 6); assert.ok(steps.some((s) => s.kind === "family"));
   const decisionStep = steps.find((s) => s.kind === "decision");
   assert.equal(decisionStep.decision.decision, "BLOCK");
   const dual = buildPaymentDualExplain(decisionStep.decision);

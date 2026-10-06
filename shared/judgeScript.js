@@ -154,8 +154,19 @@ export const JUDGE_DEMO_STEPS = [
     autoMs: 0,
   },
   {
+    id: "family",
+    title: "6 · Family guardian",
+    titleHi: "परिवार गार्जियन",
+    narration:
+      "Before any money moves, the payer asks Mom to approve. Guardian declines on the Family inbox — payment stays locked.",
+    narrationHi: "पेमेंट से पहले माँ से अप्रूवल। गार्जियन मना करता है — लॉक रहता है।",
+    kind: "family",
+    message: MESSAGE,
+    autoMs: 0,
+  },
+  {
     id: "outcome",
-    title: "6 · Outcome",
+    title: "7 · Outcome",
     titleHi: "नतीजा",
     narration:
       "Outcome: BLOCKED. Playbook documented, community complaint ready, victim told to hang up and leave AnyDesk. Advisory only — no real payment.",

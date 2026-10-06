@@ -3,6 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchTransactionRisk } from "../services/guardianApi";
 import { buildTxnContext } from "../utils/txnContext";
 import { addPayment, parseAmount } from "../utils/store";
+import {
+  fetchTrustedContacts,
+  requestFamilyApproval,
+  getFamilyApproval,
+  simulateGuardianOnDevice,
+} from "../services/familyApi";
 
 /** Seconds of cooling-off. First-time + high-risk / large first payment get a longer lock. */
 const COOLDOWN = { high: 15, elevated: 8, normal: 0 };
@@ -22,6 +28,11 @@ export default function ConfirmPay() {
   const [txn, setTxn] = useState(null);
   const [ackVerified, setAckVerified] = useState(false);
   const [remaining, setRemaining] = useState(null);
+  const [contacts, setContacts] = useState([]);
+  const [contactId, setContactId] = useState("mom");
+  const [approval, setApproval] = useState(null);
+  const [approvalMode, setApprovalMode] = useState("");
+  const [asking, setAsking] = useState(false);
 
   const amount = location.state?.amount || "₹842";
   const payee = location.state?.payee || location.state?.note || "Official biller";
@@ -38,10 +49,26 @@ export default function ConfirmPay() {
   useEffect(() => {
     let alive = true;
     fetchTransactionRisk(ctx).then((r) => alive && setTxn(r));
+    fetchTrustedContacts().then((c) => alive && setContacts(c));
     return () => {
       alive = false;
     };
   }, [ctx]);
+
+  // Live poll approval status
+  useEffect(() => {
+    if (!approval?.id || approval.status !== "pending") return undefined;
+    let alive = true;
+    const tick = async () => {
+      const a = await getFamilyApproval(approval.id);
+      if (alive && a) setApproval(a);
+    };
+    const t = setInterval(tick, 2000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, [approval?.id, approval?.status]);
 
   const level = txn ? combineLevel(textRisk, txn.level) : null;
   const amountNum = parseAmount(amount);
@@ -76,7 +103,15 @@ export default function ConfirmPay() {
   }, [cooldown]);
 
   const needsAck = level === "high" || level === "elevated" || timeLock;
-  const ready = level !== null && remaining === 0 && (!needsAck || ackVerified);
+  const needsFamily = Boolean(timeLock || level === "high");
+  const familyBlocked = approval?.status === "declined";
+  // Declined guardian blocks pay; pending waits; no request still allows after cooldown.
+  const ready =
+    level !== null &&
+    remaining === 0 &&
+    (!needsAck || ackVerified) &&
+    !familyBlocked &&
+    (approval?.status !== "pending");
 
   function handlePay() {
     setProcessing(true);
@@ -191,6 +226,84 @@ export default function ConfirmPay() {
       {level === "high" && (
         <div className="error-banner" style={{ textAlign: "left", marginBottom: "1rem" }}>
           High-risk payment: genuine buyers, banks and government offices never ask you to pay to receive money.
+        </div>
+      )}
+
+
+      {needsFamily && (
+        <div className="family-ask panel-inset" data-testid="family-ask" style={{ maxWidth: 480, margin: "0 auto 1rem", textAlign: "left" }}>
+          <strong>Ask a trusted contact</strong>
+          <p className="muted small" style={{ margin: "0.35rem 0 0.65rem" }}>
+            High-risk / time-locked payments can wait for Mom, Sister or Brother to approve. Works offline with a simulated guardian.
+          </p>
+          {!approval && (
+            <>
+              <label className="small">
+                Trusted contact
+                <select value={contactId} onChange={(e) => setContactId(e.target.value)} style={{ display: "block", width: "100%", marginTop: 4 }}>
+                  {(contacts.length ? contacts : [{ id: "mom", name: "Priya Prasad (Mom)" }]).map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="row-actions" style={{ marginTop: "0.65rem" }}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  disabled={asking}
+                  onClick={async () => {
+                    setAsking(true);
+                    const out = await requestFamilyApproval({
+                      contactId,
+                      amount,
+                      payee,
+                      entity,
+                      risk: level === "high" ? "High Risk" : textRisk || "Caution",
+                      summary,
+                      payerNote: `Please check this ${amount} payment to ${payee}`,
+                    });
+                    setApproval(out.approval);
+                    setApprovalMode(out.mode);
+                    setAsking(false);
+                  }}
+                >
+                  {asking ? "Sending…" : "Send approval request"}
+                </button>
+              </div>
+            </>
+          )}
+          {approval && (
+            <div className="stack" style={{ gap: "0.5rem" }}>
+              <div className="chip-row">
+                <span className={`chip ${approval.status === "approved" ? "" : "chip-bad"}`}>Status: {approval.status}</span>
+                <span className="chip">{approval.contact?.name}</span>
+                <span className="chip">{approvalMode || (approval.offlineSim ? "offline" : "server")}</span>
+              </div>
+              {approval.status === "pending" && (
+                <>
+                  <p className="muted small" style={{ margin: 0 }}>Waiting for guardian… Open their inbox or simulate on this device:</p>
+                  <div className="row-actions">
+                    <Link className="btn btn-secondary" to={`/family${approval.id ? `?id=${approval.id}` : ""}`}>Open guardian inbox</Link>
+                    <button type="button" className="btn btn-secondary" onClick={async () => {
+                      const out = await simulateGuardianOnDevice(approval.id, "declined");
+                      setApproval(out.approval);
+                    }}>Simulate decline</button>
+                    <button type="button" className="btn btn-safe" onClick={async () => {
+                      const out = await simulateGuardianOnDevice(approval.id, "approved");
+                      setApproval(out.approval);
+                    }}>Simulate approve</button>
+                  </div>
+                </>
+              )}
+              {approval.status === "declined" && (
+                <div className="error-banner" style={{ margin: 0 }}>Guardian declined. Payment stays locked. Call 1930 if you already shared a PIN.</div>
+              )}
+              {approval.status === "approved" && (
+                <div className="alert-banner" style={{ margin: 0 }}>Guardian approved. You may confirm only if you still trust this payee.</div>
+              )}
+              {approval.decisionNote && <p className="muted small">{approval.decisionNote}</p>}
+            </div>
+          )}
         </div>
       )}
 

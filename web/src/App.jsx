@@ -12,6 +12,7 @@ import ComplaintSent from "./pages/ComplaintSent.jsx";
 import ThreatMap from "./pages/ThreatMap.jsx";
 import ModelCard from "./pages/ModelCard.jsx";
 import FraudLab from "./pages/FraudLab.jsx";
+import FamilyGuard from "./pages/FamilyGuard.jsx";
 import { getSettings, useStoreValue } from "./utils/store";
 
 export default function App() {
@@ -39,6 +40,8 @@ export default function App() {
           <Route path="/success" element={<Success />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/blocked" element={<Blocked />} />
+          <Route path="/family" element={<FamilyGuard />} />
+          <Route path="/family/:id" element={<FamilyGuard />} />
           <Route path="/mock-pay" element={<Success />} />
         </Routes>
       </main>
