@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import DualExplain from "../DualExplain.jsx";
+import PlaybookTimeline from "./PlaybookTimeline.jsx";
+import StatusBadge, { inferStatusMode } from "../StatusBadge.jsx";
 
 const TONE = { SAFE: "safe", WARNING: "warn", BLOCK: "danger" };
 const DECISION_TEXT = { SAFE: "Safe to pay", WARNING: "Proceed with caution", BLOCK: "Payment blocked" };
@@ -53,6 +56,15 @@ export default function DecisionCard({ result, onInvestigate, onDna }) {
           <div className="decision-badges">
             <span className={`decision-badge badge-${tone}`} data-testid="decision-badge">{result.decision}</span>
             <span className={`level-pill level-${result.riskLevel}`}>{result.riskLevel} RISK</span>
+            <StatusBadge
+              mode={inferStatusMode({
+                source: result.mlAvailable ? "hybrid" : "api",
+                mlAvailable: result.mlAvailable,
+                ml: result.ml,
+                score_breakdown: result.mlAvailable ? { ml: result.ml?.score } : { ml: null },
+              })}
+              detail={result.mlAvailable ? "ML + graph + rules" : "Graph + rules (ML offline)"}
+            />
           </div>
           <h3>{DECISION_TEXT[result.decision]}</h3>
           <p className="muted small">
@@ -111,6 +123,9 @@ export default function DecisionCard({ result, onInvestigate, onDna }) {
           </ul>
         </div>
       )}
+
+      {result.playbook && <PlaybookTimeline playbook={result.playbook} compact />}
+      {(result.dual || null) && <DualExplain dual={result.dual} />}
 
       <div className="row-actions" style={{ marginTop: 0 }}>
         <button type="button" className="btn btn-primary" onClick={() => setWhy((v) => !v)} aria-expanded={why} data-testid="why-btn">

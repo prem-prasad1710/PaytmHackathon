@@ -1,4 +1,5 @@
 import { normalizeResult } from "../shared/offlineEngine.js";
+import { buildMessageDualExplain } from "../shared/dualExplain.js";
 
 export const ML_URL = (process.env.ML_SERVICE_URL || process.env.ML_URL || "http://localhost:8001").replace(/\/$/, "");
 const ML_TIMEOUT_MS = Number(process.env.ML_TIMEOUT_MS || 2500);
@@ -58,10 +59,12 @@ const RISK_COPY = {
  */
 export function blendWithMl(base, ml) {
   if (!ml || typeof ml.scam_probability !== "number") {
-    return {
+    const out = {
       ...base,
       score_breakdown: { rules: base.score, ml: null, final: base.score, mode: "rules_only" },
     };
+    out.dual = buildMessageDualExplain(out);
+    return out;
   }
 
   const unmatched = (base.red_flags || []).includes("unmatched_template");
@@ -111,7 +114,7 @@ export function blendWithMl(base, ml) {
     suggested_ui: riskChanged ? undefined : base.suggested_ui,
   });
 
-  return {
+  const out = {
     ...base,
     ...merged,
     score_breakdown: {
@@ -134,6 +137,8 @@ export function blendWithMl(base, ml) {
       model: ml.model,
     },
   };
+  out.dual = buildMessageDualExplain(out);
+  return out;
 }
 
 const TXN_TEXT = {
