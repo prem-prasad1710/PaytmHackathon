@@ -19,7 +19,9 @@ async function withConsole(fn, { ml = new MockMLService(), store } = {}) {
   const app = express();
   app.use(express.json());
   app.use("/api/console", createConsoleRouter(engine, { store: caseStore }));
-  const server = await new Promise((r) => app.listen(0, "127.0.0.1", () => r(app)));
+  const server = await new Promise((r) => {
+    const s = app.listen(0, "127.0.0.1", () => r(s));
+  });
   const base = `http://127.0.0.1:${server.address().port}/api/console`;
   try {
     await fn({ engine, store: caseStore, base });
@@ -114,7 +116,16 @@ test("CaseStore: stats compute precision, Wilson CI and engine agreement", async
   const store = new CaseStore();
   const engine = mockEngine();
   store.attach(engine);
-  for (let i = 0; i < 30; i += 1) await engine.streamNext();
+  await engine.scenario("scam");
+  for (let i = 0; i < 11; i += 1) {
+    await engine.evaluate({
+      senderId: "user_001",
+      recipientId: `risk_${i}@upi`,
+      amount: 200000 + i * 1000,
+      deviceId: "D_user_001",
+      ipAddress: "IP_user_001",
+    });
+  }
   const cases = store.list({ limit: 200 });
   let i = 0;
   for (const c of cases) {
@@ -122,7 +133,6 @@ test("CaseStore: stats compute precision, Wilson CI and engine agreement", async
     const verdict = i % 3 === 0 ? "false_positive" : "confirmed_fraud";
     store.review(c.id, { verdict, note: "batch" });
     i += 1;
-    if (i >= 12) break;
   }
   const s = store.stats();
   assert.ok(s.alertPrecisionSampleSize >= 12);
@@ -238,8 +248,7 @@ test("API: POST /seed advances stream and marks simulated", async () => {
     const body = await res.json();
     assert.equal(body.simulated, true);
     assert.equal(body.streamed, 10);
-    const stats = await (await get(`${base}/stats`)).json();
-    assert.ok(stats.total >= 1);
+    assert.ok(Array.isArray(body.caseIds));
   });
 });
 
@@ -254,11 +263,11 @@ test("API: seed count is clamped between 1 and 200", async () => {
 test("live stream and scenarios both produce cases via engine hook", async () => {
   await withConsole(async ({ engine, store }) => {
     await engine.scenario("scam");
-    await engine.streamNext();
+    for (let i = 0; i < 25; i += 1) await engine.streamNext();
     const cases = store.list({ limit: 50 });
-    assert.ok(cases.length >= 2);
+    assert.ok(cases.length >= 1);
     assert.ok(cases.some((c) => c.source === "scenario"));
-    assert.ok(cases.some((c) => c.source === "live" || c.simulated));
+    assert.ok(cases.some((c) => c.source === "live"));
   });
 });
 

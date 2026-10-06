@@ -321,15 +321,15 @@
 }
 
 .call-hangup-panel {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
+  position: sticky;
+  top: 4.4rem;
+  z-index: 15;
+  margin-bottom: 1rem;
+  border-radius: 14px;
   background: var(--danger);
   color: #fff;
-  padding: 1rem 1.25rem 1.25rem;
-  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25);
+  padding: 1rem 1.25rem 1.1rem;
+  box-shadow: 0 10px 30px rgba(220, 38, 38, 0.35);
 }
 
 .call-hangup-panel h3 {
@@ -347,6 +347,8 @@
   margin: 0 0 0.85rem;
   padding-left: 1.2rem;
   line-height: 1.5;
+  columns: 2;
+  column-gap: 2rem;
 }
 
 .call-hangup-steps li {
@@ -385,7 +387,11 @@
   }
 
   .call-hangup-panel {
-    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    position: static;
+  }
+
+  .call-hangup-steps {
+    columns: 1;
   }
 
   .call-hangup-actions {

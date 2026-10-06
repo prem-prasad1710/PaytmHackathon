@@ -183,6 +183,16 @@ export default function CallShield() {
         </p>
       </header>
 
+      {finalLevel === "HANG UP NOW" && (
+        <HangUpPanel
+          summary={summary}
+          risk="High Risk"
+          score={finalScore}
+          onSave={handleSave}
+          saved={saved}
+        />
+      )}
+
       <div className="call-shield-layout">
         <div className="call-shield-left panel stack">
           <CallMeter score={finalScore} level={finalLevel} source={scoreSource} />
@@ -234,16 +244,6 @@ export default function CallShield() {
           </section>
         </div>
       </div>
-
-      {finalLevel === "HANG UP NOW" && (
-        <HangUpPanel
-          summary={summary}
-          risk={finalLevel === "HANG UP NOW" ? "High Risk" : "Caution"}
-          score={finalScore}
-          onSave={handleSave}
-          saved={saved}
-        />
-      )}
     </div>
   );
 }

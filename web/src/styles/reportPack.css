@@ -81,12 +81,18 @@
 
 .report-pack-grid {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
+}
+
+.report-pack-grid > *,
+.report-pack-page > * {
+  min-width: 0;
 }
 
 @media (min-width: 768px) {
   .report-pack-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
   }
   .report-pack-grid .span-full {
