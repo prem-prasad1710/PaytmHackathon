@@ -16,7 +16,7 @@ export const PLAYBOOKS = [
       { id: "collect", label: "Collect / ₹1 verify", labelHi: "कलेक्ट / ₹1 वेरिफाई", nextAsk: "Ask for a tiny UPI collect or prepaid 'verification' payment" },
       { id: "cashout", label: "PIN / OTP harvest", labelHi: "PIN/OTP चोरी", nextAsk: "Ask for UPI PIN, OTP or remote-access app" },
     ],
-    keywords: ["kyc", "केवाईसी", "account freeze", "verify account", "bijli kat", "disconnection", "kat jayegi", "power cut", "expired kyc", "kyc pending"],
+    keywords: ["kyc", "केवाईसी", "account freeze", "verify account", "bijli kat", "disconnection", "kat jayegi", "power cut", "expired kyc", "kyc pending", "केवाईसी अपडेट", "அடையாள சரிபார்ப்பு", "కెవైసి", "কেওয়াইসি"],
   },
   {
     id: "wrong_transfer",
@@ -72,7 +72,7 @@ export const PLAYBOOKS = [
       { id: "threat", label: "Arrest / leak threat", labelHi: "गिरफ्तारी धमकी", nextAsk: "Threaten digital arrest, parcel drugs, or intimate video leak" },
       { id: "pay", label: "Pay to 'clear' case", labelHi: "केस क्लियर", nextAsk: "Demand UPI / crypto / gift cards to close the case" },
     ],
-    keywords: ["digital arrest", "cbi", "cyber cell", "police", "customs", "parcel", "anydesk", "teamviewer", "sextortion", "video leak", "warrant"],
+    keywords: ["digital arrest", "cbi", "cyber cell", "police", "customs", "parcel", "anydesk", "teamviewer", "sextortion", "video leak", "warrant", "डिजिटल अरेस्ट", "साइबर सेल", "சைபர் செல்", "సైబర్ సెల్", "সাইবার সেল"],
   },
   {
     id: "marketplace",

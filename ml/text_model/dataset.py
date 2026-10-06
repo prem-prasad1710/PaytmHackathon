@@ -41,6 +41,8 @@ SCAM_TEMPLATES: dict[str, list[str]] = {
         "Paytm: wallet limit exceeded. Verify identity within {n} hrs {link} or balance will be forfeited",
         "Dear user, your {bank} netbanking will be deactivated. Update Aadhaar & PAN: {link}",
         "Aapka account block hone wala hai. KYC verification ke liye {phone} par call karein ya {link} kholein",
+        "नमस्कार, तुमचे Paytm KYC पूर्ण नाही. लिंकवर ₹{amt} द्या व UPI पिन टाका: {link}",
+        "স্যার, আপনার KYC বাকি আছে। {link} এ গিয়ে ₹{amt} দিয়ে পিন দিন নইলে অ্যাকাউন্ট ব্লক",
     ],
     "qr_scam": [
         "Scan this QR code to receive Rs {amt} in your account. Enter your UPI PIN to accept the payment",
@@ -75,6 +77,9 @@ SCAM_TEMPLATES: dict[str, list[str]] = {
         "Customer care here. Tell me the 6 digit code sent on your phone to cancel the order of Rs {amt}",
         "OTP bata dijiye {name} ji, aapka loan approve ho gaya hai bas OTP chahiye verification ke liye",
         "Card expire ho gaya hai. Naya card activate karne ke liye CVV, expiry aur OTP share karein",
+        "साइबर सेल: कॉल पर रहो, परिवार को मत बताना, AnyDesk लगाओ और OTP बताओ वरना डिजिटल अरेस्ट",
+        "வணக்கம் சைபர் செல். Call-ல் இருங்கள், AnyDesk install செய்து OTP அனுப்புங்கள் இல்லையெனில் digital arrest",
+        "স্যার পুলিশ থেকে বলছি। OTP আর UPI পিন এখনই পাঠান নইলে কেস হবে",
     ],
     "job_fee_scam": [
         "Work from home job! Earn Rs 3000 daily. Pay registration fee Rs {amt} to {upi} to start",

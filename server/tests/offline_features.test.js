@@ -47,3 +47,19 @@ test("dual explain never invents a different verdict", () => {
   assert.equal(dual.analyst.verdict, r.risk);
   assert.equal(dual.user.generatedBy, "template");
 });
+
+test("regional Hindi digital-arrest sample is High Risk", () => {
+  const r = run("hindiDigitalArrest");
+  assert.equal(r.risk, "High Risk");
+  assert.ok(["hi", "hinglish"].includes(r.detected_language) || r.detected_language.startsWith("hi"));
+  assert.ok(r.coercion?.coachingSuspected || r.playbook?.playbookId === "digital_arrest");
+});
+
+test("Tamil and Bengali samples are High Risk", () => {
+  const ta = run("tamilCyber");
+  const bn = run("bengaliRefund");
+  assert.equal(ta.risk, "High Risk");
+  assert.equal(bn.risk, "High Risk");
+  assert.ok(String(ta.detected_language).startsWith("ta"));
+  assert.ok(String(bn.detected_language).startsWith("bn"));
+});

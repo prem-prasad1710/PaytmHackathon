@@ -53,6 +53,41 @@ const PATTERNS = [
     weight: 18,
     re: /main bataata|main bataunga|jo bolun|follow my (instruction|steps)|step by step|mere kehne pe|do as i say|jo main bolu/i,
   },
+  {
+    id: "secrecy_hi",
+    label: "Don't tell family (Hindi)",
+    labelHi: "परिवार को मत बताना",
+    weight: 20,
+    re: /परिवार को मत|माता.?पिता को मत|किसी को मत बताना|गुप्त रखो|चुपके से/,
+  },
+  {
+    id: "stay_on_call_hi",
+    label: "Stay on call (Hindi)",
+    labelHi: "कॉल मत काटना",
+    weight: 22,
+    re: /कॉल पर रहो|कॉल मत काटो|फोन मत काटना|लाइन काटना मना/,
+  },
+  {
+    id: "otp_pin_hi",
+    label: "OTP/PIN (Hindi)",
+    labelHi: "ओटीपी / पिन माँग",
+    weight: 26,
+    re: /ओटीपी बताओ|ओटीपी भेजो|पिन बताओ|यूपीआई पिन|गुप्त कोड/,
+  },
+  {
+    id: "screen_share_regional",
+    label: "Remote app (regional)",
+    labelHi: "रिमोट ऐप",
+    weight: 28,
+    re: /ஏனிடெஸ்க்|ఏనీడెస్క్|অ্যানিডেস্ক|अॅनीडेस्क|any\s*desk|ടീംവ്യൂവർ/i,
+  },
+  {
+    id: "authority_ta",
+    label: "Police/cyber (Tamil/Telugu/Bengali)",
+    labelHi: "போலீஸ் / সাইবার",
+    weight: 24,
+    re: /சைபர்\s*செல்|போலీஸ்|సైబర్\s*సెల్|পুলিশ|সাইবার\s*সেল|सायबर\s*सेल|डिजिटल\s*अरेस्ट|டிஜிட்டல்\s*அரெஸ்ட்/,
+  },
 ];
 
 /**
@@ -76,7 +111,8 @@ export function detectCoercion(text = "") {
 
   const scoreBoost = Math.min(40, flags.reduce((s, f) => s + f.weight, 0));
   const coachingSuspected = flags.some((f) =>
-    ["stay_on_call", "secrecy", "screen_share", "coaching", "authority_fear"].includes(f.id)
+    ["stay_on_call", "secrecy", "screen_share", "coaching", "authority_fear",
+     "secrecy_hi", "stay_on_call_hi", "screen_share_regional", "authority_ta"].includes(f.id)
   );
 
   return {

@@ -534,6 +534,87 @@ export const SCENARIO_LIST = [
       safe_to_proceed: true,
     },
   },
+
+  {
+    id: "hindiDigitalArrest",
+    label: "डिजिटल अरेस्ट (Hindi)",
+    concepts: ["police", "otp"],
+    keywords: ["डिजिटल अरेस्ट", "साइबर सेल", "कॉल पर रहो", "किसी को मत बताना", "एनीडेस्क", "ओटीपी"],
+    text: "नमस्ते, मैं साइबर सेल से बात कर रहा हूँ। आपके नाम पर ड्रग पार्सल है। कॉल पर रहो, परिवार को मत बताना। AnyDesk इंस्टॉल करो और ओटीपी बताओ नहीं तो डिजिटल अरेस्ट।",
+    response: {
+      risk: "High Risk",
+      score: 96,
+      reasons: [
+        "डिजिटल अरेस्ट + साइबर सेल impersonation",
+        "Secrecy + screen-share coaching pattern",
+        "OTP मांगना — कभी भी OTP मत दो",
+      ],
+      recommended_action: "कॉल काटो। AnyDesk बंद करो। 1930 पर शिकायत करो।",
+      hindi_summary: "ये क्लासिक डिजिटल अरेस्ट स्कैम है। कुछ मत भेजो।",
+      red_flags: ["digital_arrest", "coaching", "otp_request"],
+      safe_to_proceed: false,
+    },
+  },
+  {
+    id: "tamilCyber",
+    label: "Cyber cell (Tamil)",
+    concepts: ["police", "otp"],
+    keywords: ["சைபர் செல்", "போலீஸ்", "OTP", "UPI", "கைது", "cyber", "cell"],
+    text: "வணக்கம், இது சைபர் செல். உங்கள் பெயரில் parcel பிடிபட்டது. Call-ல் இருங்கள், வீட்டில் சொல்லாதீர்கள். AnyDesk install செய்து OTP அனுப்புங்கள் இல்லையெனில் digital arrest.",
+    response: {
+      risk: "High Risk",
+      score: 95,
+      reasons: [
+        "Tamil cyber-cell impersonation + secrecy",
+        "AnyDesk / OTP harvest pattern",
+        "Digital arrest threat",
+      ],
+      recommended_action: "Call cut pannunga. AnyDesk remove pannunga. 1930-ku complaint.",
+      hindi_summary: "Tamil digital-arrest scam. OTP/PIN mat do. 1930 pe report karo.",
+      red_flags: ["digital_arrest", "regional_scam", "otp_request"],
+      safe_to_proceed: false,
+    },
+  },
+  {
+    id: "bengaliRefund",
+    label: "রিফান্ড স্ক্যাম (Bengali)",
+    concepts: ["refund", "otp"],
+    keywords: ["রিফান্ড", "টাকা ফেরত", "UPI", "পিন", "OTP", "refund"],
+    text: "স্যার, ভুল করে আপনার অ্যাকাউন্টে ৫০০০ টাকা চলে গেছে। দয়া করে refund.help@ybl এ UPI পিন দিয়ে টাকা ফেরত পাঠান। এখনই না হলে কেস হবে।",
+    response: {
+      risk: "High Risk",
+      score: 90,
+      reasons: [
+        "Wrong-credit refund demand in Bengali",
+        "Asks for UPI PIN to 'return' money",
+        "Urgency / case threat",
+      ],
+      recommended_action: "PIN/OTP deben na. Official bank app theke verify korun. 1930-e report.",
+      hindi_summary: "Bengali wrong-transfer scam. PIN mat do, verify karke report karo.",
+      red_flags: ["refund_scam", "upi_pin_request", "regional_scam"],
+      safe_to_proceed: false,
+    },
+  },
+  {
+    id: "marathiKyc",
+    label: "KYC (Marathi)",
+    concepts: ["kyc", "shortlink"],
+    keywords: ["केवायसी", "खाते ब्लॉक", "लिंक", "पिन", "KYC", "bit.ly"],
+    text: "नमस्कार, तुमचे Paytm KYC पूर्ण नाही. २४ तासांत खाते ब्लॉक होईल. या लिंकवर ₹१ द्या व UPI पिन टाका: https://bit.ly/paytm-kyc-mr",
+    response: {
+      risk: "High Risk",
+      score: 93,
+      reasons: [
+        "Marathi KYC urgency + short link",
+        "₹1 verify + UPI PIN request",
+        "Classic account-block phishing",
+      ],
+      recommended_action: "Link उघडू नका. फक्त अधिकृत Paytm अॅप वापरा. 1930 वर तक्रार.",
+      hindi_summary: "Marathi KYC phishing. Link/PIN ignore karo.",
+      red_flags: ["kyc_phishing", "shortened_link", "regional_scam"],
+      safe_to_proceed: false,
+    },
+  },
   {
     id: "complaintDemo",
     label: "Flagged UPI (complaints)",
@@ -730,12 +811,12 @@ export const CONCEPT_VARIANTS = {
     "बधाई",
     "बधाई हो",
   ],
-  kyc: ["kyc", "kycpending", "केवाईसी", "के वाई सी"],
+  kyc: ["kyc", "kycpending", "केवाईसी", "के वाई सी", "কেওয়াইসি", "కెవైసి", "केवायसी"],
   otp: ["otp", "otpp", "ओटीपी", "ओ टी पी"],
   upin: ["upipin", "upin", "यूपीआईपिन", "यूपीआई पिन", "pinbatao", "पिन"],
   refund: ["refund", "refnd", "refond", "रिफंड", "वापसी"],
   emergency: ["emergency", "emergeny", "emrgency", "इमरजेंसी", "आपातकाल"],
-  police: ["police", "polce", "पुलिस", "cybercell", "साइबरसेल", "साइबर सेल"],
+  police: ["police", "polce", "पुलिस", "cybercell", "साइबरसेल", "साइबर सेल", "சைபர் செல்", "సైబర్ సెల్", "সাইবার সেল", "सायबर सेल"],
   qr: ["qrcode", "qrscan", "क्यूआर", "स्कैन"],
   job: ["joboffer", "wfh", "नौकरी", "रजिस्ट्रेशनफीस"],
   recharge: ["recharge", "rechage", "rechrg", "रिचार्ज"],
@@ -852,7 +933,13 @@ function textIncludesKeyword(text, keyword) {
 
 function detectLanguage(text = "") {
   const hasHindi = /[\u0900-\u097F]/.test(text);
+  const hasTamil = /[\u0B80-\u0BFF]/.test(text);
+  const hasTelugu = /[\u0C00-\u0C7F]/.test(text);
+  const hasBengali = /[\u0980-\u09FF]/.test(text);
   const hasLatin = /[A-Za-z]/.test(text);
+  if (hasTamil) return hasLatin ? "ta-en" : "ta";
+  if (hasTelugu) return hasLatin ? "te-en" : "te";
+  if (hasBengali) return hasLatin ? "bn-en" : "bn";
   if (hasHindi && hasLatin) return "hinglish";
   if (hasHindi) return "hi";
   if (hasLatin) return "en";
@@ -1003,7 +1090,7 @@ export function finalizeAnalysis(result, text, meta = {}) {
 
   if (coercion.detected) {
     const serious = coercion.flags.filter((f) =>
-      ["stay_on_call", "secrecy", "screen_share", "authority_fear", "otp_pin", "coaching"].includes(f.id)
+      ["stay_on_call", "secrecy", "screen_share", "authority_fear", "otp_pin", "coaching", "secrecy_hi", "stay_on_call_hi", "otp_pin_hi", "screen_share_regional", "authority_ta"].includes(f.id)
     );
     const boost = serious.length
       ? Math.min(40, serious.reduce((s, f) => s + f.weight, 0))
