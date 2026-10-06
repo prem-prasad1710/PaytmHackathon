@@ -94,7 +94,7 @@ async function run(tag, vp, dark) {
   const rt = await page.locator("main").innerText();
   check(`${tag} report pack shows 1930 + cybercrime.gov.in`, /1930/.test(rt) && /cybercrime\.gov\.in/i.test(rt));
   await shot("report");
-  const wide = await page.evaluate(() => [...document.querySelectorAll("main *")].filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1).slice(0, 6).map((e) => `${e.tagName}.${String(e.className).slice(0, 40)} ${Math.round(e.getBoundingClientRect().right)}`));
+  const wide = await page.evaluate(() => [...document.querySelectorAll("body *")].filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1).filter((e) => getComputedStyle(e).position !== "fixed").slice(0, 8).map((e) => `${e.tagName}.${String(e.className).slice(0, 40)} ${Math.round(e.getBoundingClientRect().right)}`));
   check(`${tag} report no overflow`, !(await overflow()), wide.join(" | "));
   await ctx.close();
 }

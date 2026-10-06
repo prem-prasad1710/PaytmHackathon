@@ -267,7 +267,20 @@
   color: var(--safe);
 }
 
+.print-only-section {
+  display: none;
+}
+
 @media print {
+  .print-only-section {
+    display: block;
+  }
+
+  .print-only-section pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
   body * {
     visibility: hidden;
   }

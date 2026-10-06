@@ -1534,8 +1534,11 @@ code {
   .nav-links a {
     flex-direction: column;
     gap: 0.1rem;
-    font-size: 0.7rem;
-    padding: 0.35rem 0.6rem;
+    font-size: 0.64rem;
+    padding: 0.35rem 0.15rem;
+    flex: 1 1 0;
+    min-width: 0;
+    align-items: center;
     border-radius: 12px;
     color: white;
   }
