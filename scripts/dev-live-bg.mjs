@@ -1,74 +1,88 @@
 #!/usr/bin/env node
+/**
+ * Detached live stack — leaves ML + API + Vite running after this process exits.
+ * Logs: logs/{ml,api,web}.log   PIDs: logs/live.pids   Stop: bash logs/STOP.sh
+ */
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { mkdirSync, writeFileSync, createWriteStream } from "node:fs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const logs = path.join(root, "logs");
-mkdirSync(logs, { recursive: true });
-const node = process.execPath;
-const env = {
-  ...process.env,
-  PATH: `${path.dirname(node)}${path.delimiter}${process.env.PATH || ""}`,
-  ML_SERVICE_URL: "http://127.0.0.1:8001",
-  ML_SERVICE_ENABLED: "true",
-  PORT: "8787",
-};
+fs.mkdirSync(logs, { recursive: true });
 
-function bg(name, args, cwd) {
-  const log = path.join(logs, `${name}.log`);
-  const out = createWriteStream(log, { flags: "a" });
-  const child = spawn(node, args, {
+const pids = [];
+
+function bg(name, cmd, args, cwd, envExtra = {}) {
+  const logPath = path.join(logs, `${name}.log`);
+  const out = fs.openSync(logPath, "a");
+  const err = fs.openSync(logPath, "a");
+  const child = spawn(cmd, args, {
     cwd,
-    env,
+    env: { ...process.env, ...envExtra },
     detached: true,
-    stdio: ["ignore", out, out],
+    stdio: ["ignore", out, err],
   });
   child.unref();
-  writeFileSync(path.join(logs, `${name}.pid`), String(child.pid));
-  console.log(`${name} pid=${child.pid} log=${log}`);
-  return child.pid;
+  pids.push({ name, pid: child.pid });
+  fs.closeSync(out);
+  fs.closeSync(err);
+  console.log(`[live-bg] started ${name} pid=${child.pid} → logs/${name}.log`);
 }
 
-// ML via ml.mjs serve
-bg("ml", ["scripts/ml.mjs", "serve"], root);
-setTimeout(() => {
-  const npmCli = path.join(path.dirname(node), "npm");
-  // start server with node directly
-  const sp = spawn(node, ["index.js"], {
-    cwd: path.join(root, "server"),
-    env,
-    detached: true,
-    stdio: ["ignore", createWriteStream(path.join(logs, "api.log"), { flags: "a" }), createWriteStream(path.join(logs, "api.log"), { flags: "a" })],
-  });
-  sp.unref();
-  writeFileSync(path.join(logs, "api.pid"), String(sp.pid));
-  console.log(`api pid=${sp.pid} log=${path.join(logs, "api.log")}`);
-}, 2000);
-setTimeout(() => {
-  const viteBin = path.join(root, "web", "node_modules", "vite", "bin", "vite.js");
-  const wp = spawn(node, [viteBin, "--host", "0.0.0.0", "--port", "5173"], {
-    cwd: path.join(root, "web"),
-    env,
-    detached: true,
-    stdio: ["ignore", createWriteStream(path.join(logs, "web.log"), { flags: "a" }), createWriteStream(path.join(logs, "web.log"), { flags: "a" })],
-  });
-  wp.unref();
-  writeFileSync(path.join(logs, "web.pid"), String(wp.pid));
-  console.log(`web pid=${wp.pid} log=${path.join(logs, "web.log")}`);
-  writeFileSync(
-    path.join(logs, "STOP.sh"),
-    `#!/bin/bash
-cd "$(dirname "$0")/.."
-for f in logs/ml.pid logs/api.pid logs/web.pid; do
-  if [ -f "$f" ]; then kill "$(cat "$f")" 2>/dev/null || true; fi
-done
-pkill -f 'uvicorn inference.model_service' 2>/dev/null || true
-pkill -f 'Paytm-Scam-Shield-Hackathon/server/index.js' 2>/dev/null || true
-pkill -f 'vite --host 0.0.0.0 --port 5173' 2>/dev/null || true
-echo stopped
-`
-  );
-  console.log("Stop with: bash logs/STOP.sh");
-}, 3500);
+bg(
+  "ml",
+  "bash",
+  ["-lc", 'exec python3 -m uvicorn inference.model_service:app --host 0.0.0.0 --port 8001'],
+  path.join(root, "ml"),
+);
+bg(
+  "api",
+  "npm",
+  ["run", "dev"],
+  path.join(root, "server"),
+  { HOST: "0.0.0.0", PORT: "8787", ML_SERVICE_URL: "http://127.0.0.1:8001" },
+);
+bg(
+  "web",
+  "npm",
+  ["run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"],
+  path.join(root, "web"),
+  {
+    VITE_USE_MOCK: "false",
+    VITE_API_BASE_URL: "http://127.0.0.1:8787",
+    VITE_ML_BASE_URL: "http://127.0.0.1:8001",
+  },
+);
+
+fs.writeFileSync(
+  path.join(logs, "live.pids"),
+  pids.map((p) => `${p.name}=${p.pid}`).join("\n") + "\n",
+);
+fs.writeFileSync(
+  path.join(logs, "STOP.sh"),
+  `#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+if [[ -f "$ROOT/logs/live.pids" ]]; then
+  while IFS='=' read -r name pid; do
+    [[ -z "\${pid:-}" ]] && continue
+    kill "$pid" 2>/dev/null || true
+    # also kill process group children if any
+    pkill -P "$pid" 2>/dev/null || true
+  done < "$ROOT/logs/live.pids"
+fi
+lsof -ti:8787 -ti:8001 -ti:5173 2>/dev/null | xargs kill 2>/dev/null || true
+echo "Stopped live stack (ports 8787/8001/5173)."
+`,
+);
+fs.chmodSync(path.join(logs, "STOP.sh"), 0o755);
+
+console.log("");
+console.log("Live stack RUNNING in background.");
+console.log("  Web:  http://127.0.0.1:5173/");
+console.log("  API:  http://127.0.0.1:8787/api/health");
+console.log("  ML:   http://127.0.0.1:8001/health");
+console.log("  Stop: bash logs/STOP.sh");
+console.log("  Logs: logs/{ml,api,web}.log");
