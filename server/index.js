@@ -7,7 +7,6 @@ import {
   pickMockByText,
   finalizeAnalysis,
   safeParseJson,
-  applyLlmRephrase,
   extractEntities,
   COMPLAINT_REGISTRY,
 } from "../shared/offlineEngine.js";
@@ -22,6 +21,8 @@ import {
 import { addReport, getStats } from "./reports.js";
 import { FraudEngine } from "./fraud/engine.js";
 import { createFraudRouter } from "./fraud/routes.js";
+import { createConsoleRouter } from "./fraud/consoleRoutes.js";
+import { createLinkRouter } from "./link/routes.js";
 import { chatCompletion, llmStatus, resolveLlmConfig } from "./llmClient.js";
 import {
   listTrustedContacts,
@@ -42,14 +43,21 @@ if (String(process.env.ALLOW_INSECURE_TLS || "").toLowerCase() === "true") {
 const llmCfg = () => resolveLlmConfig();
 const llmLive = () => llmCfg().provider !== "none";
 
+const corsOrigins = String(process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((s) => s.trim().replace(/\/$/, ""))
+  .filter(Boolean);
 app.use(cors({
-  origin: true, // reflect request origin (localhost Vite + LAN Expo/web)
+  // Unset: reflect any origin (local Vite + LAN). In production set CORS_ORIGIN to the frontend URL(s).
+  origin: corsOrigins.length ? corsOrigins : true,
   credentials: true,
 }));
 app.use(express.json({ limit: "1mb" }));
 const fraudEngine = new FraudEngine();
 fraudEngine.warmUp();
 app.use("/api/fraud", createFraudRouter(fraudEngine));
+app.use("/api/console", createConsoleRouter(fraudEngine));
+app.use("/api/links", createLinkRouter());
 
 app.get("/api/family/contacts", (_req, res) => {
   res.json({ contacts: listTrustedContacts() });
@@ -227,10 +235,8 @@ app.post("/api/analyze", async (req, res) => {
         llmProvider: out.provider,
       });
     }
-    // Engines own risk/score/flags; LLM may only rephrase user-facing wording.
-    const engine = pickMockByText(text);
-    const rephrased = applyLlmRephrase(engine, parsed);
-    return respond(rephrased, {
+    // Source tag for UI badge: groq | grok (LLM assist). Engines still own the blended verdict.
+    return respond(parsed, {
       source: out.provider === "groq" ? "groq" : "grok",
       model: out.model,
       message: `Live ${out.provider} assist · engines keep the verdict`,

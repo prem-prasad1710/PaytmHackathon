@@ -1947,3 +1947,8 @@ code {
   background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger-text);
 }
 .helpline-card a { color: inherit; font-weight: 700; }
+
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.9rem; }
+.tool-tile { display: flex; flex-direction: column; gap: 0.35rem; text-decoration: none; color: inherit; }
+.tool-tile .tool-icon { font-size: 1.6rem; }
+.tool-tile span:last-child { color: var(--muted); font-size: 0.9rem; }

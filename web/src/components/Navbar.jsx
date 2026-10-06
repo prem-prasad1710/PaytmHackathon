@@ -6,7 +6,7 @@ const LINKS = [
   { to: "/analyze", label: "Check", icon: "▣" },
   { to: "/threats", label: "Map", icon: "🗺" },
   { to: "/lab", label: "Lab", icon: "⚡" },
-  { to: "/demo", label: "Demo", icon: "▶" },
+  { to: "/tools", label: "Tools", icon: "✦" },
   { to: "/family", label: "Family", icon: "👨‍👩‍👧" },
   { to: "/history", label: "History", icon: "☰" },
   { to: "/model", label: "Model", icon: "🧠" },
